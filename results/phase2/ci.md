@@ -7,10 +7,14 @@
 | opcd_gr_s0_at_best | 0.016 [0.003, 0.031] | 0.178 [0.133, 0.227] | 0.380 [0.307, 0.467] | 0.693 [0.631, 0.756] | 0.281 [0.234, 0.331] | 0.678 [0.611, 0.745] | 0.497 [0.409, 0.584] |
 | opcd_gr_s1 | 0.050 [0.028, 0.078] | 0.213 [0.160, 0.267] | 0.407 [0.327, 0.487] | 0.716 [0.653, 0.773] | 0.209 [0.169, 0.256] | 0.651 [0.571, 0.725] | 0.497 [0.409, 0.577] |
 | opcd_gr_s1_at_best | 0.000 [0.000, 0.000] | 0.191 [0.147, 0.249] | 0.413 [0.333, 0.493] | 0.662 [0.600, 0.724] | 0.397 [0.344, 0.450] | 0.732 [0.658, 0.799] | 0.517 [0.436, 0.604] |
+| opcd_gr_s2 | 0.100 [0.069, 0.134] | 0.200 [0.151, 0.253] | 0.500 [0.420, 0.573] | 0.667 [0.604, 0.724] | 0.312 [0.266, 0.362] | 0.671 [0.597, 0.745] | 0.483 [0.409, 0.571] |
+| opcd_gr_s2_at_best | 0.003 [0.000, 0.009] | 0.178 [0.129, 0.231] | 0.600 [0.520, 0.673] | 0.644 [0.582, 0.707] | 0.269 [0.222, 0.316] | 0.671 [0.597, 0.745] | 0.544 [0.463, 0.624] |
 | opcd_s0 | 0.022 [0.006, 0.037] | 0.191 [0.142, 0.249] | 0.480 [0.400, 0.553] | 0.582 [0.511, 0.644] | 0.516 [0.459, 0.575] | 0.738 [0.664, 0.805] | 0.523 [0.436, 0.604] |
 | opcd_s0_at_best | 0.003 [0.000, 0.013] | 0.160 [0.116, 0.213] | 0.427 [0.353, 0.507] | 0.773 [0.716, 0.822] | 0.547 [0.491, 0.603] | 0.745 [0.678, 0.812] | 0.597 [0.517, 0.678] |
 | opcd_s1 | 0.050 [0.028, 0.075] | 0.218 [0.169, 0.276] | 0.453 [0.367, 0.533] | 0.733 [0.671, 0.791] | 0.503 [0.450, 0.559] | 0.698 [0.624, 0.772] | 0.550 [0.470, 0.631] |
 | opcd_s1_at_best | 0.050 [0.028, 0.075] | 0.218 [0.169, 0.276] | 0.453 [0.367, 0.533] | 0.733 [0.671, 0.791] | 0.503 [0.450, 0.559] | 0.698 [0.624, 0.772] | 0.550 [0.470, 0.631] |
+| opcd_s2 | 0.050 [0.028, 0.075] | 0.249 [0.200, 0.302] | 0.467 [0.393, 0.553] | 0.711 [0.653, 0.764] | 0.512 [0.463, 0.566] | 0.664 [0.591, 0.738] | 0.510 [0.429, 0.597] |
+| opcd_s2_at_best | 0.013 [0.003, 0.025] | 0.129 [0.089, 0.173] | 0.307 [0.240, 0.387] | 0.720 [0.658, 0.778] | 0.522 [0.469, 0.578] | 0.664 [0.584, 0.738] | 0.503 [0.423, 0.584] |
 | p1_dpo | 0.172 [0.131, 0.212] | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 0.298 [0.244, 0.356] | 0.087 [0.059, 0.122] | 0.074 [0.034, 0.121] | 0.040 [0.013, 0.074] |
 | p1_opcd | 0.044 [0.022, 0.069] | 0.116 [0.076, 0.160] | 0.340 [0.267, 0.413] | 0.884 [0.840, 0.924] | 0.519 [0.463, 0.578] | 0.691 [0.624, 0.765] | 0.557 [0.476, 0.644] |
 | p1_opcd_gr | 0.006 [0.000, 0.016] | 0.124 [0.084, 0.169] | 0.367 [0.287, 0.447] | 0.804 [0.751, 0.853] | 0.503 [0.447, 0.566] | 0.745 [0.671, 0.812] | 0.557 [0.476, 0.638] |
@@ -23,8 +27,8 @@ Mean ± std over seeds:
 | method | adv_violation | false_refusal | borderline_false_refusal | helpful | recovery | recovery_self_k10 | recovery_self_k20 |
 |---|---|---|---|---|---|---|---|
 | dpo (n=3) | 0.080 ± 0.053 | 0.024 ± 0.041 | 0.027 ± 0.041 | 0.279 ± 0.041 | 0.176 ± 0.066 | 0.134 ± 0.059 | 0.089 ± 0.024 |
-| opcd_gr (n=2) | 0.034 ± 0.022 | 0.202 ± 0.016 | 0.400 ± 0.009 | 0.702 ± 0.019 | 0.247 ± 0.053 | 0.658 ± 0.009 | 0.483 ± 0.019 |
-| opcd (n=2) | 0.036 ± 0.020 | 0.204 ± 0.019 | 0.467 ± 0.019 | 0.658 ± 0.107 | 0.509 ± 0.009 | 0.718 ± 0.029 | 0.537 ± 0.019 |
+| opcd_gr (n=3) | 0.056 ± 0.041 | 0.202 ± 0.011 | 0.433 ± 0.058 | 0.690 ± 0.025 | 0.269 ± 0.053 | 0.662 ± 0.010 | 0.483 ± 0.013 |
+| opcd (n=3) | 0.041 ± 0.016 | 0.219 ± 0.029 | 0.467 ± 0.013 | 0.675 ± 0.082 | 0.510 ± 0.006 | 0.700 ± 0.037 | 0.528 ± 0.021 |
 
 Exact McNemar (paired, same prompts). a_only = prompts where only the first condition has the event.
 
@@ -100,3 +104,38 @@ Exact McNemar (paired, same prompts). a_only = prompts where only the first cond
 | dpo_s1 vs opcd_s1 | recovery | 32 | 117 | <0.0001 |
 | dpo_s1 vs opcd_s1 | recovery_self_k10 | 6 | 80 | <0.0001 |
 | dpo_s1 vs opcd_s1 | recovery_self_k20 | 5 | 70 | <0.0001 |
+| opcd_s2 vs student_none | adv_violation | 12 | 130 | <0.0001 |
+| opcd_s2 vs student_none | false_refusal | 56 | 1 | <0.0001 |
+| opcd_s2 vs student_none | borderline_false_refusal | 69 | 0 | <0.0001 |
+| opcd_s2 vs student_none | helpful | 99 | 31 | <0.0001 |
+| opcd_s2 vs student_none | recovery | 160 | 3 | <0.0001 |
+| opcd_s2 vs student_none | recovery_self_k10 | 89 | 0 | <0.0001 |
+| opcd_s2 vs student_none | recovery_self_k20 | 72 | 1 | <0.0001 |
+| opcd_s2 vs student_prompt | adv_violation | 15 | 28 | 0.066 |
+| opcd_s2 vs student_prompt | false_refusal | 34 | 36 | 0.905 |
+| opcd_s2 vs student_prompt | borderline_false_refusal | 24 | 27 | 0.7798 |
+| opcd_s2 vs student_prompt | helpful | 91 | 19 | <0.0001 |
+| opcd_s2 vs student_prompt | recovery | 102 | 18 | <0.0001 |
+| opcd_s2 vs student_prompt | recovery_self_k10 | 63 | 6 | <0.0001 |
+| opcd_s2 vs student_prompt | recovery_self_k20 | 58 | 2 | <0.0001 |
+| opcd_gr_s2 vs student_prompt | adv_violation | 29 | 26 | 0.7877 |
+| opcd_gr_s2 vs student_prompt | false_refusal | 27 | 40 | 0.1421 |
+| opcd_gr_s2 vs student_prompt | borderline_false_refusal | 28 | 26 | 0.8919 |
+| opcd_gr_s2 vs student_prompt | helpful | 78 | 16 | <0.0001 |
+| opcd_gr_s2 vs student_prompt | recovery | 62 | 42 | 0.0619 |
+| opcd_gr_s2 vs student_prompt | recovery_self_k10 | 65 | 7 | <0.0001 |
+| opcd_gr_s2 vs student_prompt | recovery_self_k20 | 57 | 5 | <0.0001 |
+| opcd_gr_s2 vs opcd_s2 | adv_violation | 25 | 9 | 0.009 |
+| opcd_gr_s2 vs opcd_s2 | false_refusal | 6 | 17 | 0.0347 |
+| opcd_gr_s2 vs opcd_s2 | borderline_false_refusal | 17 | 12 | 0.4583 |
+| opcd_gr_s2 vs opcd_s2 | helpful | 25 | 35 | 0.2451 |
+| opcd_gr_s2 vs opcd_s2 | recovery | 29 | 93 | <0.0001 |
+| opcd_gr_s2 vs opcd_s2 | recovery_self_k10 | 16 | 15 | 1.0 |
+| opcd_gr_s2 vs opcd_s2 | recovery_self_k20 | 16 | 20 | 0.6177 |
+| dpo_s2 vs opcd_s2 | adv_violation | 19 | 16 | 0.7359 |
+| dpo_s2 vs opcd_s2 | false_refusal | 0 | 56 | <0.0001 |
+| dpo_s2 vs opcd_s2 | borderline_false_refusal | 0 | 69 | <0.0001 |
+| dpo_s2 vs opcd_s2 | helpful | 22 | 115 | <0.0001 |
+| dpo_s2 vs opcd_s2 | recovery | 13 | 143 | <0.0001 |
+| dpo_s2 vs opcd_s2 | recovery_self_k10 | 3 | 88 | <0.0001 |
+| dpo_s2 vs opcd_s2 | recovery_self_k20 | 3 | 69 | <0.0001 |

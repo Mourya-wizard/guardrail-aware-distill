@@ -1,0 +1,23 @@
+{
+ "phase": "phase2",
+ "run": "opcd_s2",
+ "guided_frac": 0.0,
+ "steps": 200,
+ "bs": 16,
+ "lr": 5e-06,
+ "eval_every": 50,
+ "seed": 2,
+ "teacher": "large",
+ "teacher_prompt": "default",
+ "mask_prefix": false,
+ "prefix_source": "bank",
+ "divergence": "rkl",
+ "steps_done": 200,
+ "best_step": 150,
+ "best_dev_score": 0.04666666666666667,
+ "rollouts": 3200,
+ "completion_tokens": 330567,
+ "peak_reserved_gb": 37.8,
+ "peak_allocated_gb": 33.1,
+ "minutes": 32.3
+}

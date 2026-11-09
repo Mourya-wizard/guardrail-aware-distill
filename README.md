@@ -237,7 +237,39 @@ Phase 1 left eight weaknesses: only 2 test templates per adversarial class (14�
 
 **Pre-registered decision rule.** Guided rollouts count as helping only if GR beats plain OPCD on recovery at k = 10 *and* k = 20 with McNemar p < 0.05 in at least 2 of 3 seeds, without raising benign + borderline false refusal by more than 3 points. Otherwise the write-up says "no measured benefit" and reports the closest ablation.
 
-**Status:** not run yet. Results will be added here under `results/v2/`; the Phase 1 results above stay unchanged. The Phase 1 state is frozen at the git tag [`track-a-v1`](https://github.com/Mourya-wizard/guardrail-aware-distill/tree/track-a-v1).
+### Phase 2 results (3 seeds, final checkpoint at 200 steps, Phase 2 test set)
+
+Test set: 320 adversarial prompts (80 per class, 20 in Hinglish), 225 benign, 150 borderline benign. "Recovery (bank prefix)" is strict recovery with one held-out bank prefix per prompt; "k = 10 / 20" use the student's own unsafe starts, cut to 10 or 20 tokens (149 of 320 adversarial prompts have one). Seeded rows are mean ± std over seeds 0–2; per-seed values and 95% CIs are in [`results/phase2/ci.md`](results/phase2/ci.md).
+
+| condition | adv. violation | false refusal | borderline false refusal | helpful | recovery (bank prefix) | recovery k=10 | recovery k=20 |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| student, no prompt | 0.419 | 0.004 | 0.007 | 0.409 | 0.022 | 0.067 | 0.034 |
+| student + safety prompt | 0.091 | 0.258 | 0.487 | 0.391 | 0.250 | 0.282 | 0.134 |
+| teacher (9B) + safety prompt | 0.016 | 0.031 | 0.367 | 0.880 | 0.412 | 0.617 | 0.322 |
+| 🔵 **OPCD**, 3 seeds | 0.041 ± 0.016 | 0.219 ± 0.029 | 0.467 ± 0.013 | 0.675 ± 0.082 | **0.510 ± 0.006** | 0.700 ± 0.037 | 0.528 ± 0.021 |
+| 🟢 **OPCD + guided rollouts**, 3 seeds | 0.056 ± 0.041 | 0.202 ± 0.011 | 0.433 ± 0.058 | 0.690 ± 0.025 | 0.269 ± 0.053 | 0.662 ± 0.010 | 0.483 ± 0.013 |
+| 🟠 **DPO** (compute-matched), 3 seeds | 0.080 ± 0.053 | 0.024 ± 0.041 | 0.027 ± 0.041 | 0.279 ± 0.041 | 0.176 ± 0.066 | 0.134 ± 0.059 | 0.089 ± 0.024 |
+| Phase 1 OPCD checkpoint, no retraining | 0.044 | 0.116 | 0.340 | 0.884 | 0.519 | 0.691 | 0.557 |
+| Phase 1 OPCD + guided checkpoint | 0.006 | 0.124 | 0.367 | 0.804 | 0.503 | 0.745 | 0.557 |
+| Phase 1 DPO checkpoint | 0.172 | 0.000 | 0.000 | 0.298 | 0.087 | 0.074 | 0.040 |
+
+Compute: OPCD and OPCD + guided each used 3,200 student rollouts (about 330k completion tokens, 33 min, 37 GB peak on the shared GPU); DPO sampled 3 replies for each of 1,250 train prompts (3,750 student samples, 1,362 preference pairs, 16.6% with a templated redirect as chosen).
+
+**Pre-registered decision rule: guided rollouts do not help.** The rule required GR to beat plain OPCD on recovery at k = 10 *and* k = 20 (McNemar p < 0.05) in at least 2 of 3 seeds. It failed outright: at k = 10 the paired tests give p = 0.08, 0.28, 1.0 and at k = 20 p = 0.23, 0.22, 0.62, always with equal or more wins for plain OPCD. On bank-prefix recovery, guided rollouts are *worse* in every seed (0.269 vs 0.510; recovered only by GR / only by OPCD: 30 / 104, 31 / 125, 29 / 93; p < 0.0001 each). We do not know why; the likely candidates are the ablations below (loss on the forced-prefix positions, the fixed prefix bank), which have not all been run yet.
+
+What Phase 2 shows:
+- **The Phase 1 headline holds on a 3x larger and harder test set.** Distillation cuts adversarial violations from 0.419 to 0.041 with no safety prompt, and keeps helpfulness (0.675) far above the prompted student (0.391), which refuses 25.8% of ordinary and 48.7% of borderline requests.
+- **Borderline requests are a real weak spot.** All distilled models refuse 43–47% of safe-but-sensitive-looking requests, and so does the prompted 0.8B (48.7%). The 9B teacher refuses 36.7% itself, so the student inherits a ceiling from it.
+- **DPO looks good on refusals and bad on everything else.** It has the lowest false-refusal rates (0.024, 0.027) but the lowest helpfulness (0.279) and recovery (0.176, 0.089 at k = 20), so it avoids refusing by being unhelpful.
+- **The Phase 1 checkpoints give the same picture without retraining**, except DPO recovery, which drops from 0.726 (Phase 1 metric) to 0.087 under the stricter Phase 2 metric. Strict recovery is the metric that changed the most between phases.
+
+### Verifier audit
+
+The audit compared 300 sampled replies with Qwen3Guard-Gen-8B (WildGuard is gated). Agreement was 0.94 (abuse), 0.86 (off-topic and PII), 0.82 (borderline), 0.78 (benign) and 0.56 (guarantee). Cohen's kappa was low (0.16–0.69), partly because positives are rare at n = 50 per class. Disagreements traced to differences in what the judges measure, not to lexicon bugs: the guard counts a refusal anywhere in a reply while the verifier counts only an opening refusal; the guard cannot know which strings are planted private data (the verifier correctly flags a refusal that repeats the planted phone number); and the guard has no guarantee category, so the "guarantee" comparison used a poor proxy. The verifier was not changed. The audit is a sanity check, not a validation; a human-labelling sheet is in `results/phase2/raw/audit_sheet.csv`. Per-class numbers: [`results/phase2/audit_agreement.json`](results/phase2/audit_agreement.json).
+
+**Ablations (seed 0 only):** running; the table and figure will be added here when they finish.
+
+**Status:** main comparison done (3 seeds); ablations in progress. The Phase 1 state is frozen at the git tag [`track-a-v1`](https://github.com/Mourya-wizard/guardrail-aware-distill/tree/track-a-v1).
 
 ---
 
