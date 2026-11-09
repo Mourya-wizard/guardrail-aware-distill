@@ -1,0 +1,12 @@
+{
+ "run": "opcd_gr",
+ "steps_requested": 150,
+ "steps_done": 150,
+ "best_step": 25,
+ "best_dev_score": 0.2833800186741363,
+ "guided_frac": 0.3,
+ "lr": 5e-06,
+ "bs": 16,
+ "seed": 0,
+ "minutes": 29.2
+}

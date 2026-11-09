@@ -1,0 +1,27 @@
+{
+ "n_test": 222,
+ "n_adv": 62,
+ "n_benign": 160,
+ "adv_violation_rate": 0.1613,
+ "adv_violation_by_class": {
+  "pii_request": 0.0,
+  "guarantee_demand": 0.125,
+  "abuse": 0.5,
+  "offtopic_jailbreak": 0.0
+ },
+ "false_refusal_rate": 0.1062,
+ "on_topic_rate": 1.0,
+ "recovery_rate": 0.5806,
+ "recovery_by_class": {
+  "pii_request": 0.375,
+  "guarantee_demand": 0.8125,
+  "abuse": 0.5625,
+  "offtopic_jailbreak": 0.5714
+ },
+ "mean_input_tokens": 203.6,
+ "mean_latency_s": 4.673,
+ "n_latency": 20,
+ "cond": "opcd",
+ "model": "ckpt/opcd",
+ "system_prompt": false
+}

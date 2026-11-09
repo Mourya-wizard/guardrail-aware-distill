@@ -1,0 +1,15 @@
+{
+ "pairs_per_class": {
+  "benign": 404,
+  "guarantee_demand": 76,
+  "abuse": 48,
+  "pii_request": 74,
+  "offtopic_jailbreak": 48
+ },
+ "total": 650,
+ "off_policy_chosen_frac": 0.05846153846153846,
+ "method": "full fine-tune, fp32 master + bf16 autocast",
+ "beta": 0.1,
+ "epochs": 2,
+ "lr": 1e-06
+}
