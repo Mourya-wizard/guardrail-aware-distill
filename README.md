@@ -61,7 +61,7 @@ Safety behaviour is usually bolted on at inference: a long system prompt (more t
 2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#10--references)). If a reply *starts* unsafe, does the model correct course, and does training on forced unsafe prefixes teach that?
 3. **Does narrowing the scope help?** In a narrow domain the violation space is small and enumerable, so a sub-1B student might have the capacity to hold the task *and* the guardrails, and coverage becomes measurable (the **scoping hypothesis**, stated as a hypothesis).
 
-**Why a case study.** The method is general, but a measurement needs a concrete task with ground truth. We use one narrow domain, rental-housing customer support, where "violation" can be checked by rules: a planted private string appears in a reply, a guarantee phrase is used, an insult is written, or an off-topic request is obeyed. The results below are therefore evidence about this case study; whether they carry over to other domains, tasks or model sizes is untested (see the limitations and the Track B roadmap).
+**Why a case study.** The method is general, but a measurement needs a concrete task with ground truth. We use one narrow domain, rental-housing customer support, where "violation" can be checked by rules: a planted private string appears in a reply, a guarantee phrase is used, an insult is written, or an off-topic request is obeyed. The results below are therefore evidence about this case study; whether they carry over to other domains, tasks or model sizes is untested (see the limitations).
 
 **Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#10--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#10--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) a **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
 
@@ -312,12 +312,6 @@ Each row changes one thing about the guided-rollout run (200 steps, guided fract
 
 Decode is launch-bound on this setup (a batch of 16 takes as long as a batch of 1), so 2.2x fewer input tokens barely changes latency; the OPCD student is faster mainly because its replies are shorter (125 vs 150 tokens). The 9B teacher is only about 10% slower per reply than the 0.8B student here, so latency is not a strong argument for distillation in this setup; input-token cost and over-refusal are.
 
-### Not done in Phase 2
-
-- **Forgetting check** (IFEval / MMLU subsets before and after training): skipped, because it needs external datasets.
-- **Human labels** for the verifier audit: the sheet is generated but unlabelled.
-- **Larger students and more domains** (Track B).
-
 **Status:** Phase 2 complete. The Phase 1 state is frozen at the git tag [`track-a-v1`](https://github.com/Mourya-wizard/guardrail-aware-distill/tree/track-a-v1).
 
 ---
@@ -434,14 +428,6 @@ Phase 1 limitations (Phase 2 addresses most of them; see section 6):
 - **Recovery metric:** it only checks that the continuation contains no violation; a continuation that keeps complying in other words can still pass.
 - **Shortened training:** 150 steps instead of the planned 300; the guided-rollout checkpoint (step 25) was picked on a 34-prompt adversarial dev set.
 - **Latency:** shared GPU, batch 1, n = 20, desktop GPU only. Generation was slow because the Qwen3.5 decode path is launch-bound here; the baseline evaluations ran with PyTorch fallback kernels and later runs after `flash-linear-attention` was installed (numerically near-identical, not bit-identical).
-
-## 12 · Roadmap (Track B, not started)
-
-1. More domains through the `Domain` interface (SQL generation with a parser verifier, medical-intake summarisation).
-2. Scoping study: capacity × breadth sweep (0.8B / 2B / 4B students; 1 / 2 / 3 domains), a coverage certificate (violation taxonomy, guided-rollout coverage, residual violation per class), recovery rate versus forced-prefix length.
-3. Full method comparison over 3 seeds: OPCD-GR vs DPO, KTO, SimPO, GRPO with a verifier reward, chain-of-safety SFT, and an external guard model.
-4. Out-of-domain behaviour of the narrow student (safe failure versus confident unsafe output).
-5. Agentic and speech extension: distilling a tool-gateway policy into a tool-calling small model.
 
 ## License
 
