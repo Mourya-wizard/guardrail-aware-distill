@@ -12,3 +12,5 @@ __pycache__/
 *.pt
 *.bin
 P3_guardrail_distill_trackA_prompt.md
+P3_guardrail_distill_trackA2_prompt.md
+PROMPT_A2.md

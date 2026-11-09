@@ -26,3 +26,4 @@ run $PY -m gd.dpo_baseline                                                      
 run $PY -m gd.eval --cond dpo --n_latency 20
 run $PY -m gd.eval --cond summary
 run $PY -m gd.plots
+run $PY -m gd.stats                                   # bootstrap CIs + McNemar -> results/ci.md

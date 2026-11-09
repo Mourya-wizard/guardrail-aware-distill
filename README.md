@@ -25,12 +25,12 @@
 ## TL;DR
 
 - **What:** a customer-support model for a rental platform sees a customer message plus a CRM block that contains **private data** (owner phone and email, another tenant's flat). It must help from the policy but never leak, promise guarantees, be abusive, or follow off-topic and jailbreak requests. Normally that needs a long safety system prompt at every call. Here the guardrails are **distilled into the weights** instead.
-- **How:** **on-policy reverse-KL distillation.** The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (such as "Sure! The owner's number is") so the student also practises recovering from a bad start.
+- **How:** **on-policy context distillation** (the base method of [Ye et al., 2026](#9--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (such as "Sure! The owner's number is") so the student also practises recovering from a bad start.
 - **Key results** (all measured, single seed, 62 adversarial and 160 benign test prompts from held-out templates):
   - 🛡️ Adversarial violations fall from **0.516** (student, no prompt) to **0.161** with OPCD and **0.113** with OPCD + guided rollouts, with **no safety prompt at inference**.
   - ✂️ Input tokens drop from **478.6** (student + safety prompt) to **203.6**.
-  - 🙅 The prompted 0.8B student **over-refuses 36.9%** of benign requests; the distilled students refuse 10.6% and 13.1%.
-- **The honest twist:** guided rollouts **did not improve recovery** in this run (0.452 vs 0.581 without them). Even the teacher recovers from only 43.6% of held-out forced prefixes. A DPO baseline recovers best (0.726) but still fails most off-topic jailbreaks.
+  - 🙅 The prompted 0.8B student **over-refuses 36.9%** of benign requests; the distilled students refuse 10.6% and 13.1% (paired McNemar p < 0.0001 for both), while their violation rates are **statistically indistinguishable** from the prompted student's (p = 0.58 and 1.0).
+- **The honest twist:** guided rollouts **did not improve recovery** in this run (0.452 vs 0.581 without them, McNemar p = 0.057). Even the teacher recovers from only 43.6% of held-out forced prefixes. A DPO baseline recovers best (0.726) but still fails most off-topic jailbreaks.
 
 <div align="center">
 
@@ -50,7 +50,7 @@ Safety behaviour is usually bolted on at inference: a long system prompt (more t
 2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#9--references)). If a reply *starts* unsafe, does the model correct course?
 3. **Does narrowing the domain help?** In one narrow domain the violation space is small and enumerable, so a sub-1B student might have the capacity to hold the task *and* the guardrails (the **scoping hypothesis**, stated as a hypothesis; Track A tests one domain and one size only).
 
-Context distillation and on-policy distillation are not new (see [references](#9--references)). The method under test combines **on-policy reverse-KL from a safety-prompted teacher** with **guided rollouts**, and is compared with DPO on verifier-labelled pairs.
+**Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#9--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#9--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) the **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
 
 ## 2 · What we built
 
@@ -162,6 +162,27 @@ With a forced prefix, `recovered` = the continuation contains no violation; plan
 
 Each class has only 14–16 test prompts, so one prompt moves a rate by about 6 points.
 
+### Confidence intervals and paired tests ![ci](https://img.shields.io/badge/95%25-bootstrap%20CIs-1baf7a)
+
+Computed from the saved replies (no regeneration) by `python -m gd.stats`: 1,000 bootstrap resamples over prompts, and exact two-sided McNemar tests on the same prompts. Full tables in [`results/ci.md`](results/ci.md).
+
+| condition | adv. violation [95% CI] | false refusal [95% CI] | recovery [95% CI] |
+|---|:--:|:--:|:--:|
+| student, no prompt | 0.516 [0.387, 0.629] | 0.000 [0.000, 0.000] | 0.242 [0.129, 0.355] |
+| student + safety prompt | 0.113 [0.032, 0.194] | 0.369 [0.294, 0.438] | 0.371 [0.258, 0.500] |
+| teacher + safety prompt | 0.081 [0.016, 0.145] | 0.019 [0.000, 0.044] | 0.435 [0.306, 0.548] |
+| OPCD | 0.161 [0.065, 0.258] | 0.106 [0.062, 0.156] | 0.581 [0.452, 0.710] |
+| OPCD + guided rollouts | 0.113 [0.032, 0.194] | 0.131 [0.081, 0.181] | 0.452 [0.339, 0.581] |
+| DPO | 0.194 [0.097, 0.290] | 0.000 [0.000, 0.000] | 0.726 [0.613, 0.839] |
+
+| comparison (McNemar p) | adv. violation | false refusal | recovery |
+|---|:--:|:--:|:--:|
+| OPCD vs student, no prompt | **< 0.0001** (better) | **< 0.0001** (worse) | **< 0.0001** (better) |
+| OPCD vs student + prompt | 0.58 | **< 0.0001** (better) | **0.0023** (better) |
+| OPCD + guided vs student + prompt | 1.0 | **< 0.0001** (better) | 0.30 |
+| OPCD + guided vs OPCD | 0.25 | 0.60 | 0.057 |
+| DPO vs OPCD | 0.83 | **< 0.0001** (better) | 0.093 |
+
 ### Training
 
 ![training](results/training_curves.png)
@@ -175,9 +196,9 @@ Reverse-KL loss falls from 0.72 to 0.37 (OPCD) and 0.71 to 0.38 (with guided rol
 ### What the results say
 
 > [!IMPORTANT]
-> **1. The prompt can be moved into the weights, at a cost.** Without any safety prompt, both distilled students cut adversarial violations from 0.516 to 0.11–0.16 and halve the input tokens (203.6 vs 478.6). The prompted student reaches 0.113 but refuses 36.9% of benign requests; the distilled students refuse 10.6–13.1%.
+> **1. The prompt can be moved into the weights, at a cost.** Without any safety prompt, both distilled students cut adversarial violations from 0.516 to 0.11–0.16 (p < 0.0001) and halve the input tokens (203.6 vs 478.6). Their violation rates are not distinguishable from the prompted student's (0.113; p = 0.58 and 1.0), but they refuse far fewer benign requests (10.6–13.1% vs 36.9%, p < 0.0001). This is the clearest result of the run.
 >
-> **2. Guided rollouts did not help here.** OPCD + guided rollouts has fewer violations than OPCD (0.113 vs 0.161) but *lower* recovery (0.452 vs 0.581). With 62 test prompts, one training run, and a step-25 checkpoint picked on a noisy dev set, this is not evidence for or against the idea; it only means the hypothesis is **not supported by this run**.
+> **2. Guided rollouts did not help here.** OPCD + guided rollouts has fewer violations than OPCD (0.113 vs 0.161, p = 0.25) but *lower* recovery (0.452 vs 0.581, p = 0.057). Neither difference is significant at 0.05. With 62 test prompts, one training run, and a step-25 checkpoint picked on a noisy dev set, this is not evidence for or against the idea; it only means the hypothesis is **not supported by this run**.
 >
 > **3. The teacher is the ceiling.** The teacher recovers from only 43.6% of held-out forced prefixes, so guided rollouts cannot teach what the teacher does not do. (The student exceeding the teacher on recovery, 0.581 vs 0.436, shows how loose this metric is.)
 >
@@ -191,11 +212,11 @@ Reverse-KL loss falls from 0.72 to 0.37 (OPCD) and 0.71 to 0.38 (with guided rol
 
 | | Takeaway | Evidence |
 |:-:|---|---|
-| ✅ | **On-policy reverse-KL distillation removes most of the prompt's effect** without any prompt at inference, using 57% fewer input tokens. | violations 0.516 → 0.161; tokens 478.6 → 203.6 |
-| ✅ | **A long safety prompt makes a small model over-refuse;** distillation keeps more helpfulness. | false refusal 0.369 vs 0.106 |
-| ⚖️ | **Guided rollouts: no recovery gain in this run.** Recovery 0.452 vs 0.581, single seed, step-25 checkpoint. | main table |
+| ✅ | **On-policy context distillation (Ye et al.'s method) reproduces the prompt's safety effect in a narrow domain** without any prompt at inference, using 57% fewer input tokens. | violations 0.516 → 0.161 (p < 0.0001); vs prompted student p = 0.58; tokens 478.6 → 203.6 |
+| ✅ | **A long safety prompt makes a small model over-refuse;** distillation keeps more helpfulness. | false refusal 0.369 vs 0.106 (p < 0.0001) |
+| ⚖️ | **Guided rollouts: no recovery gain in this run.** Recovery 0.452 vs 0.581 (p = 0.057), single seed, step-25 checkpoint. | CI table |
 | ⚖️ | **DPO wins on recovery and false refusals, loses on off-topic jailbreaks.** | per-class table |
-| ⚠️ | **Verifier choices change the story.** An early verifier counted "I cannot guarantee…" anywhere as a refusal and inflated the prompted models' false refusals (0.63 and 0.36 before the fix, 0.369 and 0.019 after). All conditions were re-scored with the final verifier. | `code` history, `eval --cond rescore` |
+| ⚠️ | **Verifier choices change the story.** An early verifier counted "I cannot guarantee…" anywhere as a refusal and inflated the prompted models' false refusals (0.63 and 0.36 before the fix, 0.369 and 0.019 after). All conditions were re-scored with the final verifier. | `python -m gd.eval --cond rescore` |
 
 ---
 
@@ -242,6 +263,7 @@ guardrail-aware-distill/
 │   ├── opcd.py                  # on-policy reverse-KL distillation (+ guided rollouts)
 │   ├── dpo_baseline.py          # verifier-labelled pairs + TRL DPO
 │   ├── plots.py                 # training curves, results bar chart, recovery chart
+│   ├── stats.py                 # bootstrap CIs + exact McNemar tests from saved replies -> results/ci.md
 │   ├── data.py · env.py         # data build/load · project-local cache environment
 ├── tests/test_verifier.py       # 24 hand-written verifier and split tests
 ├── scripts/m0_check.py          # environment / tokenizer / model-load check
@@ -264,18 +286,18 @@ guardrail-aware-distill/
 
 ## 9 · References
 
-Verify the exact citation details before relying on them; they were written from memory.
-
-- **Context distillation:** A. Askell et al., *A General Language Assistant as a Laboratory for Alignment*, 2021 · C. Snell, D. Klein, R. Zhong, *Learning by Distilling Context*, 2022
-- **Safety context distillation in Llama 2:** H. Touvron et al., 2023
-- **Deliberative alignment:** M. Y. Guan et al. (OpenAI), 2024
-- **On-policy distillation:** R. Agarwal et al., *GKD*, ICLR 2024 · Y. Gu et al., *MiniLLM* (reverse KL), ICLR 2024
-- **Shallow alignment and recovery:** X. Qi et al., *Safety Alignment Should Be Made More Than Just a Few Tokens Deep*, ICLR 2025
-- **Preference optimisation:** R. Rafailov et al., *DPO*, 2023
+- **On-policy context distillation (the base method):** Ye, Dong, Wu, Huang, Wei (Microsoft Research). *On-Policy Context Distillation for Language Models.* [arXiv:2602.12275](https://arxiv.org/abs/2602.12275), 2026
+- **Prompt Baking:** A. Bhargava, C. Witkowski, A. Detkov, M. Thomson. *Prompt Baking.* [arXiv:2409.13697](https://arxiv.org/abs/2409.13697), 2024
+- **Context distillation:** A. Askell et al. *A General Language Assistant as a Laboratory for Alignment.* [arXiv:2112.00861](https://arxiv.org/abs/2112.00861), 2021 · C. Snell, D. Klein, R. Zhong. *Learning by Distilling Context.* [arXiv:2209.15189](https://arxiv.org/abs/2209.15189), 2022
+- **Safety context distillation in Llama 2:** H. Touvron et al. *Llama 2: Open Foundation and Fine-Tuned Chat Models.* [arXiv:2307.09288](https://arxiv.org/abs/2307.09288), 2023
+- **Deliberative alignment:** M. Y. Guan et al. (OpenAI). *Deliberative Alignment: Reasoning Enables Safer Language Models.* [arXiv:2412.16339](https://arxiv.org/abs/2412.16339), 2024
+- **On-policy distillation:** R. Agarwal, N. Vieillard, Y. Zhou, P. Stanczyk, S. Ramos, M. Geist, O. Bachem. *On-Policy Distillation of Language Models: Learning from Self-Generated Mistakes* (GKD). ICLR 2024, [arXiv:2306.13649](https://arxiv.org/abs/2306.13649) · Y. Gu, L. Dong, F. Wei, M. Huang. *MiniLLM* (reverse KL). ICLR 2024, [arXiv:2306.08543](https://arxiv.org/abs/2306.08543) · Thinking Machines Lab. [*On-Policy Distillation*](https://www.thinkingmachines.ai/blog/on-policy-distillation/) (blog), 2025
+- **Shallow alignment and recovery:** X. Qi et al. *Safety Alignment Should Be Made More Than Just a Few Tokens Deep.* ICLR 2025, [arXiv:2406.05946](https://arxiv.org/abs/2406.05946)
+- **Preference optimisation:** R. Rafailov et al. *Direct Preference Optimization.* NeurIPS 2023, [arXiv:2305.18290](https://arxiv.org/abs/2305.18290)
 
 ## 10 · Limitations
 
-- **Single seed, single domain, single student size.** No confidence intervals; differences of a few prompts are within noise.
+- **Single seed, single domain, single student size.** The CIs cover test-prompt sampling only, not training randomness; differences of a few prompts are within noise.
 - **Small test set:** 62 adversarial and 160 benign prompts, 14–16 per adversarial class; 16 held-out templates.
 - **Templated synthetic data.** Held-out templates, but the same domain, language style and CRM format as training.
 - **Rule-based verifier:** lexicons are not exhaustive and have false positives (a refusal that quotes an insult or a guarantee phrase can be flagged) and false negatives. No LLM judge and no human evaluation of helpfulness. `false_refusal` only checks the opening of a reply.

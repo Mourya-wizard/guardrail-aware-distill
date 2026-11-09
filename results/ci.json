@@ -1,0 +1,228 @@
+{
+ "ci": {
+  "student_none": {
+   "adv_violation": [
+    0.5161,
+    0.3871,
+    0.629
+   ],
+   "false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "recovery": [
+    0.2419,
+    0.129,
+    0.3548
+   ]
+  },
+  "student_prompt": {
+   "adv_violation": [
+    0.1129,
+    0.0323,
+    0.1935
+   ],
+   "false_refusal": [
+    0.3688,
+    0.2938,
+    0.4375
+   ],
+   "recovery": [
+    0.371,
+    0.2581,
+    0.5
+   ]
+  },
+  "teacher_prompt": {
+   "adv_violation": [
+    0.0806,
+    0.0161,
+    0.1452
+   ],
+   "false_refusal": [
+    0.0187,
+    0.0,
+    0.0437
+   ],
+   "recovery": [
+    0.4355,
+    0.3065,
+    0.5484
+   ]
+  },
+  "opcd": {
+   "adv_violation": [
+    0.1613,
+    0.0645,
+    0.2581
+   ],
+   "false_refusal": [
+    0.1062,
+    0.0625,
+    0.1562
+   ],
+   "recovery": [
+    0.5806,
+    0.4516,
+    0.7097
+   ]
+  },
+  "opcd_gr": {
+   "adv_violation": [
+    0.1129,
+    0.0323,
+    0.1935
+   ],
+   "false_refusal": [
+    0.1313,
+    0.0813,
+    0.1812
+   ],
+   "recovery": [
+    0.4516,
+    0.3387,
+    0.5806
+   ]
+  },
+  "dpo": {
+   "adv_violation": [
+    0.1935,
+    0.0968,
+    0.2903
+   ],
+   "false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "recovery": [
+    0.7258,
+    0.6129,
+    0.8387
+   ]
+  }
+ },
+ "mcnemar": {
+  "opcd vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 8,
+    "b_only": 5,
+    "p": 0.5811
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 1,
+    "b_only": 43,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 15,
+    "b_only": 2,
+    "p": 0.0023
+   }
+  },
+  "opcd_gr vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 5,
+    "b_only": 5,
+    "p": 1.0
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 9,
+    "b_only": 47,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 10,
+    "b_only": 5,
+    "p": 0.3018
+   }
+  },
+  "dpo vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 12,
+    "b_only": 7,
+    "p": 0.3593
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 0,
+    "b_only": 59,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 26,
+    "b_only": 4,
+    "p": 0.0001
+   }
+  },
+  "opcd_gr vs opcd": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 0,
+    "b_only": 3,
+    "p": 0.25
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 18,
+    "b_only": 14,
+    "p": 0.5966
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 3,
+    "b_only": 11,
+    "p": 0.0574
+   }
+  },
+  "dpo vs opcd": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 12,
+    "b_only": 10,
+    "p": 0.8318
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 0,
+    "b_only": 17,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 16,
+    "b_only": 7,
+    "p": 0.0931
+   }
+  },
+  "opcd vs student_none": {
+   "adv_violation": {
+    "n_pairs": 62,
+    "a_only": 3,
+    "b_only": 25,
+    "p": 0.0
+   },
+   "false_refusal": {
+    "n_pairs": 160,
+    "a_only": 17,
+    "b_only": 0,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 62,
+    "a_only": 24,
+    "b_only": 3,
+    "p": 0.0
+   }
+  }
+ }
+}
