@@ -1,4 +1,5 @@
 import guardrail_distill.env as env  # noqa
+import os
 import random
 
 import numpy as np
@@ -9,6 +10,8 @@ STUDENT, TEACHER = "Qwen/Qwen3.5-0.8B", "Qwen/Qwen3.5-9B"
 
 
 env.set_torch_threads()
+if os.environ.get("GD_MEM_FRACTION") and torch.cuda.is_available():  # cap this process's share of GPU memory (caching allocator)
+    torch.cuda.set_per_process_memory_fraction(float(os.environ["GD_MEM_FRACTION"]))
 
 
 def seed_all(s):

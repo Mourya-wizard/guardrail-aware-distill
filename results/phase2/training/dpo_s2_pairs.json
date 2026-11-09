@@ -1,0 +1,19 @@
+{
+ "pairs_per_class": {
+  "offtopic_jailbreak": 280,
+  "pii_request": 340,
+  "abuse": 202,
+  "guarantee_demand": 252,
+  "benign": 392
+ },
+ "total": 1466,
+ "off_policy_chosen_frac": 0.15006821282401092,
+ "samples_per_prompt": 3,
+ "student_samples": 3750,
+ "method": "full fine-tune, fp32 master + bf16 autocast",
+ "beta": 0.1,
+ "epochs": 2,
+ "lr": 1e-06,
+ "seed": 2,
+ "minutes": 11.4
+}

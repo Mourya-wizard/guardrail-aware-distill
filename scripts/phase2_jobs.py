@@ -6,7 +6,7 @@ import sys
 
 PY = sys.executable
 STEPS = "200"  # fixed for every Phase 2 run (Phase 1 used 150; 300 did not fit the time budget)
-MEM = {"train_large": 35, "train_self": 17, "dpo": 24, "eval_student": 6, "eval_teacher": 24, "audit": 20, "pool": 6}
+MEM = {"train_large": 45, "train_self": 17, "dpo": 19, "eval_student": 8, "eval_teacher": 32, "audit": 20, "pool": 6}
 
 
 def train(run, seed=0, gf=0.0, **flags):
@@ -26,6 +26,8 @@ jobs = [{"name": "selfprefix_pool", "cmd": [PY, "-m", "guardrail_distill.evaluat
          "mem_gb": MEM["pool"], "threads": 3, "deps": []}]
 # untrained baselines and the Phase 1 checkpoints on the Phase 2 test set (N3); short, so they go before training
 jobs += [evaluate(c, ["selfprefix_pool"]) for c in ("student_none", "student_prompt", "p1_opcd", "p1_opcd_gr", "p1_dpo")]
+jobs.append({"name": "audit_verifier", "cmd": [PY, "-m", "guardrail_distill.audit"], "mem_gb": MEM["audit"], "threads": 3,
+             "deps": [f"eval_{c}" for c in ("student_none", "student_prompt", "p1_opcd", "p1_opcd_gr", "p1_dpo")]})
 for s in range(3):
     jobs += [train(f"opcd_s{s}", s, 0.0), train(f"opcd_gr_s{s}", s, 0.3)]
 jobs += [train("abl_recteacher_s0", 0, 0.0, teacher_prompt="recovery"), train("abl_recteacher_gr_s0", 0, 0.3, teacher_prompt="recovery"),
@@ -40,6 +42,9 @@ runs = [j["name"][6:] for j in jobs if j["name"].startswith("train_")]
 jobs += [evaluate(c, ["selfprefix_pool"], teacher=True) for c in ("teacher_prompt", "teacher_prompt_recovery")]
 jobs += [evaluate(r, ["selfprefix_pool", f"train_{r}"]) for r in runs]
 jobs += [evaluate(f"{r}@best", ["selfprefix_pool", f"train_{r}"]) for r in runs if r.startswith("opcd")]
+# latency needs the whole GPU budget, so the queue only starts it when nothing else is running
+jobs.append({"name": "latency", "cmd": [PY, "-m", "guardrail_distill.evaluation", "--phase", "phase2", "--cond", "latency", "--n_latency", "50"],
+             "mem_gb": 64, "threads": 6, "deps": ["train_opcd_s0"]})
 
 if __name__ == "__main__":
     qdir = os.path.join("results", "phase2", "raw", "queue")

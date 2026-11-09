@@ -1,0 +1,1188 @@
+{
+ "ci": {
+  "dpo_s0": {
+   "adv_violation": [
+    0.1406,
+    0.1062,
+    0.1781
+   ],
+   "false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "borderline_false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "helpful": [
+    0.3067,
+    0.2489,
+    0.3689
+   ],
+   "recovery": [
+    0.1844,
+    0.1437,
+    0.2281
+   ],
+   "recovery_self_k10": [
+    0.1074,
+    0.0604,
+    0.1611
+   ],
+   "recovery_self_k20": [
+    0.0872,
+    0.047,
+    0.1342
+   ]
+  },
+  "dpo_s1": {
+   "adv_violation": [
+    0.0406,
+    0.0219,
+    0.0625
+   ],
+   "false_refusal": [
+    0.0711,
+    0.04,
+    0.1067
+   ],
+   "borderline_false_refusal": [
+    0.0733,
+    0.0333,
+    0.12
+   ],
+   "helpful": [
+    0.2311,
+    0.1778,
+    0.2844
+   ],
+   "recovery": [
+    0.2375,
+    0.1938,
+    0.2812
+   ],
+   "recovery_self_k10": [
+    0.2013,
+    0.1409,
+    0.2685
+   ],
+   "recovery_self_k20": [
+    0.1141,
+    0.0671,
+    0.1678
+   ]
+  },
+  "dpo_s2": {
+   "adv_violation": [
+    0.0594,
+    0.0344,
+    0.0844
+   ],
+   "false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "borderline_false_refusal": [
+    0.0067,
+    0.0,
+    0.02
+   ],
+   "helpful": [
+    0.2978,
+    0.24,
+    0.36
+   ],
+   "recovery": [
+    0.1062,
+    0.075,
+    0.1437
+   ],
+   "recovery_self_k10": [
+    0.094,
+    0.047,
+    0.1409
+   ],
+   "recovery_self_k20": [
+    0.0671,
+    0.0336,
+    0.1074
+   ]
+  },
+  "opcd_gr_s0": {
+   "adv_violation": [
+    0.0187,
+    0.0063,
+    0.0344
+   ],
+   "false_refusal": [
+    0.1911,
+    0.1422,
+    0.2444
+   ],
+   "borderline_false_refusal": [
+    0.3933,
+    0.32,
+    0.4733
+   ],
+   "helpful": [
+    0.6889,
+    0.6311,
+    0.7467
+   ],
+   "recovery": [
+    0.2844,
+    0.2344,
+    0.3375
+   ],
+   "recovery_self_k10": [
+    0.6644,
+    0.5906,
+    0.7383
+   ],
+   "recovery_self_k20": [
+    0.4698,
+    0.3893,
+    0.5436
+   ]
+  },
+  "opcd_gr_s0_at_best": {
+   "adv_violation": [
+    0.0156,
+    0.0031,
+    0.0312
+   ],
+   "false_refusal": [
+    0.1778,
+    0.1333,
+    0.2267
+   ],
+   "borderline_false_refusal": [
+    0.38,
+    0.3067,
+    0.4667
+   ],
+   "helpful": [
+    0.6933,
+    0.6311,
+    0.7556
+   ],
+   "recovery": [
+    0.2812,
+    0.2344,
+    0.3312
+   ],
+   "recovery_self_k10": [
+    0.6779,
+    0.6107,
+    0.745
+   ],
+   "recovery_self_k20": [
+    0.4966,
+    0.4094,
+    0.5839
+   ]
+  },
+  "opcd_gr_s1": {
+   "adv_violation": [
+    0.05,
+    0.0281,
+    0.0781
+   ],
+   "false_refusal": [
+    0.2133,
+    0.16,
+    0.2667
+   ],
+   "borderline_false_refusal": [
+    0.4067,
+    0.3267,
+    0.4867
+   ],
+   "helpful": [
+    0.7156,
+    0.6533,
+    0.7733
+   ],
+   "recovery": [
+    0.2094,
+    0.1688,
+    0.2562
+   ],
+   "recovery_self_k10": [
+    0.651,
+    0.5705,
+    0.7248
+   ],
+   "recovery_self_k20": [
+    0.4966,
+    0.4094,
+    0.5772
+   ]
+  },
+  "opcd_gr_s1_at_best": {
+   "adv_violation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "false_refusal": [
+    0.1911,
+    0.1467,
+    0.2489
+   ],
+   "borderline_false_refusal": [
+    0.4133,
+    0.3333,
+    0.4933
+   ],
+   "helpful": [
+    0.6622,
+    0.6,
+    0.7244
+   ],
+   "recovery": [
+    0.3969,
+    0.3438,
+    0.45
+   ],
+   "recovery_self_k10": [
+    0.7315,
+    0.6577,
+    0.7987
+   ],
+   "recovery_self_k20": [
+    0.5168,
+    0.4362,
+    0.604
+   ]
+  },
+  "opcd_s0": {
+   "adv_violation": [
+    0.0219,
+    0.0063,
+    0.0375
+   ],
+   "false_refusal": [
+    0.1911,
+    0.1422,
+    0.2489
+   ],
+   "borderline_false_refusal": [
+    0.48,
+    0.4,
+    0.5533
+   ],
+   "helpful": [
+    0.5822,
+    0.5111,
+    0.6444
+   ],
+   "recovery": [
+    0.5156,
+    0.4594,
+    0.575
+   ],
+   "recovery_self_k10": [
+    0.7383,
+    0.6644,
+    0.8054
+   ],
+   "recovery_self_k20": [
+    0.5235,
+    0.4362,
+    0.604
+   ]
+  },
+  "opcd_s0_at_best": {
+   "adv_violation": [
+    0.0031,
+    0.0,
+    0.0125
+   ],
+   "false_refusal": [
+    0.16,
+    0.1156,
+    0.2133
+   ],
+   "borderline_false_refusal": [
+    0.4267,
+    0.3533,
+    0.5067
+   ],
+   "helpful": [
+    0.7733,
+    0.7156,
+    0.8222
+   ],
+   "recovery": [
+    0.5469,
+    0.4906,
+    0.6031
+   ],
+   "recovery_self_k10": [
+    0.745,
+    0.6779,
+    0.8121
+   ],
+   "recovery_self_k20": [
+    0.5973,
+    0.5168,
+    0.6779
+   ]
+  },
+  "opcd_s1": {
+   "adv_violation": [
+    0.05,
+    0.0281,
+    0.075
+   ],
+   "false_refusal": [
+    0.2178,
+    0.1689,
+    0.2756
+   ],
+   "borderline_false_refusal": [
+    0.4533,
+    0.3667,
+    0.5333
+   ],
+   "helpful": [
+    0.7333,
+    0.6711,
+    0.7911
+   ],
+   "recovery": [
+    0.5031,
+    0.45,
+    0.5594
+   ],
+   "recovery_self_k10": [
+    0.698,
+    0.6242,
+    0.7718
+   ],
+   "recovery_self_k20": [
+    0.5503,
+    0.4698,
+    0.6309
+   ]
+  },
+  "opcd_s1_at_best": {
+   "adv_violation": [
+    0.05,
+    0.0281,
+    0.075
+   ],
+   "false_refusal": [
+    0.2178,
+    0.1689,
+    0.2756
+   ],
+   "borderline_false_refusal": [
+    0.4533,
+    0.3667,
+    0.5333
+   ],
+   "helpful": [
+    0.7333,
+    0.6711,
+    0.7911
+   ],
+   "recovery": [
+    0.5031,
+    0.45,
+    0.5594
+   ],
+   "recovery_self_k10": [
+    0.698,
+    0.6242,
+    0.7718
+   ],
+   "recovery_self_k20": [
+    0.5503,
+    0.4698,
+    0.6309
+   ]
+  },
+  "p1_dpo": {
+   "adv_violation": [
+    0.1719,
+    0.1313,
+    0.2125
+   ],
+   "false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "borderline_false_refusal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "helpful": [
+    0.2978,
+    0.2444,
+    0.3556
+   ],
+   "recovery": [
+    0.0875,
+    0.0594,
+    0.1219
+   ],
+   "recovery_self_k10": [
+    0.0738,
+    0.0336,
+    0.1208
+   ],
+   "recovery_self_k20": [
+    0.0403,
+    0.0134,
+    0.0738
+   ]
+  },
+  "p1_opcd": {
+   "adv_violation": [
+    0.0437,
+    0.0219,
+    0.0688
+   ],
+   "false_refusal": [
+    0.1156,
+    0.0756,
+    0.16
+   ],
+   "borderline_false_refusal": [
+    0.34,
+    0.2667,
+    0.4133
+   ],
+   "helpful": [
+    0.8844,
+    0.84,
+    0.9244
+   ],
+   "recovery": [
+    0.5188,
+    0.4625,
+    0.5781
+   ],
+   "recovery_self_k10": [
+    0.6913,
+    0.6242,
+    0.7651
+   ],
+   "recovery_self_k20": [
+    0.557,
+    0.4765,
+    0.6443
+   ]
+  },
+  "p1_opcd_gr": {
+   "adv_violation": [
+    0.0063,
+    0.0,
+    0.0156
+   ],
+   "false_refusal": [
+    0.1244,
+    0.0844,
+    0.1689
+   ],
+   "borderline_false_refusal": [
+    0.3667,
+    0.2867,
+    0.4467
+   ],
+   "helpful": [
+    0.8044,
+    0.7511,
+    0.8533
+   ],
+   "recovery": [
+    0.5031,
+    0.4469,
+    0.5656
+   ],
+   "recovery_self_k10": [
+    0.745,
+    0.6711,
+    0.8121
+   ],
+   "recovery_self_k20": [
+    0.557,
+    0.4765,
+    0.6376
+   ]
+  },
+  "student_none": {
+   "adv_violation": [
+    0.4188,
+    0.3625,
+    0.475
+   ],
+   "false_refusal": [
+    0.0044,
+    0.0,
+    0.0133
+   ],
+   "borderline_false_refusal": [
+    0.0067,
+    0.0,
+    0.02
+   ],
+   "helpful": [
+    0.4089,
+    0.3467,
+    0.4711
+   ],
+   "recovery": [
+    0.0219,
+    0.0094,
+    0.0375
+   ],
+   "recovery_self_k10": [
+    0.0671,
+    0.0336,
+    0.1141
+   ],
+   "recovery_self_k20": [
+    0.0336,
+    0.0067,
+    0.0671
+   ]
+  },
+  "student_prompt": {
+   "adv_violation": [
+    0.0906,
+    0.0594,
+    0.125
+   ],
+   "false_refusal": [
+    0.2578,
+    0.2,
+    0.3156
+   ],
+   "borderline_false_refusal": [
+    0.4867,
+    0.4067,
+    0.56
+   ],
+   "helpful": [
+    0.3911,
+    0.3244,
+    0.4533
+   ],
+   "recovery": [
+    0.25,
+    0.2,
+    0.3
+   ],
+   "recovery_self_k10": [
+    0.2819,
+    0.2081,
+    0.3557
+   ],
+   "recovery_self_k20": [
+    0.1342,
+    0.0805,
+    0.1946
+   ]
+  },
+  "teacher_prompt": {
+   "adv_violation": [
+    0.0156,
+    0.0031,
+    0.0312
+   ],
+   "false_refusal": [
+    0.0311,
+    0.0089,
+    0.0533
+   ],
+   "borderline_false_refusal": [
+    0.3667,
+    0.2933,
+    0.4467
+   ],
+   "helpful": [
+    0.88,
+    0.8356,
+    0.92
+   ],
+   "recovery": [
+    0.4125,
+    0.3594,
+    0.4688
+   ],
+   "recovery_self_k10": [
+    0.6174,
+    0.5369,
+    0.6913
+   ],
+   "recovery_self_k20": [
+    0.3221,
+    0.2483,
+    0.396
+   ]
+  }
+ },
+ "mcnemar": {
+  "opcd_s0 vs student_none": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 2,
+    "b_only": 129,
+    "p": 0.0
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 43,
+    "b_only": 1,
+    "p": 0.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 71,
+    "b_only": 0,
+    "p": 0.0
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 62,
+    "b_only": 23,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 159,
+    "b_only": 1,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 102,
+    "b_only": 2,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 73,
+    "b_only": 0,
+    "p": 0.0
+   }
+  },
+  "opcd_s0 vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 5,
+    "b_only": 27,
+    "p": 0.0001
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 27,
+    "b_only": 42,
+    "p": 0.0912
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 20,
+    "b_only": 21,
+    "p": 1.0
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 62,
+    "b_only": 19,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 103,
+    "b_only": 18,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 75,
+    "b_only": 7,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 61,
+    "b_only": 3,
+    "p": 0.0
+   }
+  },
+  "opcd_gr_s0 vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 5,
+    "b_only": 28,
+    "p": 0.0001
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 26,
+    "b_only": 41,
+    "p": 0.0864
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 15,
+    "b_only": 29,
+    "p": 0.0488
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 83,
+    "b_only": 16,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 65,
+    "b_only": 54,
+    "p": 0.3594
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 64,
+    "b_only": 7,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 53,
+    "b_only": 3,
+    "p": 0.0
+   }
+  },
+  "opcd_gr_s0 vs opcd_s0": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 2,
+    "b_only": 3,
+    "p": 1.0
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 8,
+    "b_only": 8,
+    "p": 1.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 3,
+    "b_only": 16,
+    "p": 0.0044
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 36,
+    "b_only": 12,
+    "p": 0.0007
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 30,
+    "b_only": 104,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 11,
+    "b_only": 22,
+    "p": 0.0801
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 13,
+    "b_only": 21,
+    "p": 0.2295
+   }
+  },
+  "dpo_s0 vs opcd_s0": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 45,
+    "b_only": 7,
+    "p": 0.0
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 0,
+    "b_only": 43,
+    "p": 0.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 0,
+    "b_only": 72,
+    "p": 0.0
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 16,
+    "b_only": 78,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 31,
+    "b_only": 137,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 2,
+    "b_only": 96,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 4,
+    "b_only": 69,
+    "p": 0.0
+   }
+  },
+  "opcd_s1 vs student_none": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 11,
+    "b_only": 129,
+    "p": 0.0
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 48,
+    "b_only": 0,
+    "p": 0.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 67,
+    "b_only": 0,
+    "p": 0.0
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 104,
+    "b_only": 31,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 157,
+    "b_only": 3,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 96,
+    "b_only": 2,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 78,
+    "b_only": 1,
+    "p": 0.0
+   }
+  },
+  "opcd_s1 vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 14,
+    "b_only": 27,
+    "p": 0.0596
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 33,
+    "b_only": 42,
+    "p": 0.3557
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 17,
+    "b_only": 22,
+    "p": 0.5224
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 96,
+    "b_only": 19,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 105,
+    "b_only": 24,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 71,
+    "b_only": 9,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 65,
+    "b_only": 3,
+    "p": 0.0
+   }
+  },
+  "opcd_gr_s1 vs student_prompt": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 16,
+    "b_only": 29,
+    "p": 0.0725
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 27,
+    "b_only": 37,
+    "p": 0.2604
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 20,
+    "b_only": 32,
+    "p": 0.1263
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 90,
+    "b_only": 17,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 52,
+    "b_only": 65,
+    "p": 0.2672
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 61,
+    "b_only": 6,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 56,
+    "b_only": 2,
+    "p": 0.0
+   }
+  },
+  "opcd_gr_s1 vs opcd_s1": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 10,
+    "b_only": 10,
+    "p": 1.0
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 16,
+    "b_only": 17,
+    "p": 1.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 9,
+    "b_only": 16,
+    "p": 0.2295
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 24,
+    "b_only": 28,
+    "p": 0.6778
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 31,
+    "b_only": 125,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 12,
+    "b_only": 19,
+    "p": 0.281
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 12,
+    "b_only": 20,
+    "p": 0.2153
+   }
+  },
+  "dpo_s1 vs opcd_s1": {
+   "adv_violation": {
+    "n_pairs": 320,
+    "a_only": 12,
+    "b_only": 15,
+    "p": 0.7011
+   },
+   "false_refusal": {
+    "n_pairs": 225,
+    "a_only": 10,
+    "b_only": 43,
+    "p": 0.0
+   },
+   "borderline_false_refusal": {
+    "n_pairs": 150,
+    "a_only": 1,
+    "b_only": 58,
+    "p": 0.0
+   },
+   "helpful": {
+    "n_pairs": 225,
+    "a_only": 15,
+    "b_only": 128,
+    "p": 0.0
+   },
+   "recovery": {
+    "n_pairs": 320,
+    "a_only": 32,
+    "b_only": 117,
+    "p": 0.0
+   },
+   "recovery_self_k10": {
+    "n_pairs": 149,
+    "a_only": 6,
+    "b_only": 80,
+    "p": 0.0
+   },
+   "recovery_self_k20": {
+    "n_pairs": 149,
+    "a_only": 5,
+    "b_only": 70,
+    "p": 0.0
+   }
+  }
+ },
+ "seed_mean_std": {
+  "dpo": {
+   "adv_violation": [
+    0.0802,
+    0.0531,
+    3
+   ],
+   "false_refusal": [
+    0.0237,
+    0.041,
+    3
+   ],
+   "borderline_false_refusal": [
+    0.0267,
+    0.0405,
+    3
+   ],
+   "helpful": [
+    0.2785,
+    0.0413,
+    3
+   ],
+   "recovery": [
+    0.176,
+    0.066,
+    3
+   ],
+   "recovery_self_k10": [
+    0.1342,
+    0.0585,
+    3
+   ],
+   "recovery_self_k20": [
+    0.0895,
+    0.0236,
+    3
+   ]
+  },
+  "opcd_gr": {
+   "adv_violation": [
+    0.0344,
+    0.0221,
+    2
+   ],
+   "false_refusal": [
+    0.2022,
+    0.0157,
+    2
+   ],
+   "borderline_false_refusal": [
+    0.4,
+    0.0095,
+    2
+   ],
+   "helpful": [
+    0.7023,
+    0.0189,
+    2
+   ],
+   "recovery": [
+    0.2469,
+    0.053,
+    2
+   ],
+   "recovery_self_k10": [
+    0.6577,
+    0.0095,
+    2
+   ],
+   "recovery_self_k20": [
+    0.4832,
+    0.019,
+    2
+   ]
+  },
+  "opcd": {
+   "adv_violation": [
+    0.036,
+    0.0199,
+    2
+   ],
+   "false_refusal": [
+    0.2044,
+    0.0189,
+    2
+   ],
+   "borderline_false_refusal": [
+    0.4667,
+    0.0189,
+    2
+   ],
+   "helpful": [
+    0.6578,
+    0.1068,
+    2
+   ],
+   "recovery": [
+    0.5093,
+    0.0088,
+    2
+   ],
+   "recovery_self_k10": [
+    0.7181,
+    0.0285,
+    2
+   ],
+   "recovery_self_k20": [
+    0.5369,
+    0.019,
+    2
+   ]
+  }
+ }
+}

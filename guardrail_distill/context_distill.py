@@ -140,7 +140,8 @@ def main():
             torch.cuda.empty_cache()
     gen.save_pretrained(f"{out_dir}/final"); tok.save_pretrained(f"{out_dir}/final")
     json.dump({**vars(a), "steps_done": a.steps, "best_step": best[1], "best_dev_score": best[0], "rollouts": n_rollouts,
-               "completion_tokens": n_tokens, "minutes": round((time.time() - t0) / 60, 1)},
+               "completion_tokens": n_tokens, "peak_reserved_gb": round(torch.cuda.max_memory_reserved() / 2**30, 1),
+               "peak_allocated_gb": round(torch.cuda.max_memory_allocated() / 2**30, 1), "minutes": round((time.time() - t0) / 60, 1)},
               open(f"{P['results']}/training/{a.run}_meta.json", "w"), indent=1)
 
 

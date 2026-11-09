@@ -31,7 +31,9 @@ def resolve(phase, cond):
         return f"{env.paths('phase1')['ckpt']}/{cond[3:]}", None
     run, _, which = cond.partition("@")
     base = f"{env.paths(phase)['ckpt']}/{run}"
-    return (base if phase == "phase1" else f"{base}/{which or 'final'}"), None
+    if phase == "phase1":  # Phase 1 selected the best-dev checkpoint; the original run saved it at ckpt/phase1/<run>
+        return (f"{base}/best" if os.path.isdir(f"{base}/best") else base), None
+    return f"{base}/{which or 'final'}", None
 
 
 def rate(xs):
@@ -164,6 +166,24 @@ def main():
     os.makedirs(f"{R}/eval", exist_ok=True); os.makedirs(f"{R}/raw", exist_ok=True)
     if a.cond == "selfprefix_pool":
         return selfprefix_pool(a.phase, dom, tok, rows)
+    if a.cond == "latency":  # run alone on an idle GPU: batch 1, greedy, 5 warm-up, n_latency replies
+        lat = {}
+        for c in ("student_none", "student_prompt", "opcd_s0", "teacher_prompt"):
+            name, sp = resolve(a.phase, c)
+            system = None if sp is None else dom.safety_prompt
+            model = load_model(name)
+            users = [dom.render_user(r) for r in rows[:5 + a.n_latency]]
+            for u in users[:5]:
+                generate(model, tok, [u], system, batch_size=1)
+            torch.cuda.synchronize(); t = time.time()
+            res = [generate(model, tok, [u], system, batch_size=1)[0] for u in users[5:]]
+            torch.cuda.synchronize()
+            lat[c] = {"mean_latency_s": round((time.time() - t) / a.n_latency, 3), "n": a.n_latency,
+                      "mean_output_tokens": round(sum(len(r["ids"]) for r in res) / len(res), 1),
+                      "mean_input_tokens": round(sum(len(prompt_ids(tok, u, system)) for u in users[5:]) / a.n_latency, 1)}
+            del model; torch.cuda.empty_cache()
+        json.dump(lat, open(f"{R}/latency.json", "w"), indent=1)
+        return print(json.dumps(lat, indent=1))
     name, sp = resolve(a.phase, a.cond)
     system = None if sp is None else (dom.recovery_prompt if sp == "recovery" else dom.safety_prompt)
     pool_path = f"{R}/selfprefix_pool.json"

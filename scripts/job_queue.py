@@ -19,6 +19,7 @@ def main():
     ap.add_argument("--mem_gb", type=float, default=70)
     ap.add_argument("--threads", type=int, default=21)
     ap.add_argument("--poll", type=float, default=15)
+    ap.add_argument("--max_jobs", type=int, default=0, help="cap on concurrent jobs (0 = no cap)")
     a = ap.parse_args()
     qdir = os.path.dirname(a.jobs)
     status_path = os.path.join(qdir, "status.json")
@@ -47,7 +48,7 @@ def main():
                 continue
             mem = sum(r[1]["mem_gb"] for r in running.values())
             thr = sum(r[1]["threads"] for r in running.values())
-            if mem + j["mem_gb"] > a.mem_gb or thr + j["threads"] > a.threads:
+            if mem + j["mem_gb"] > a.mem_gb or thr + j["threads"] > a.threads or (a.max_jobs and len(running) >= a.max_jobs):
                 continue
             env = dict(os.environ, GD_THREADS=str(j["threads"]), PYTHONIOENCODING="utf-8")
             log = open(os.path.join(qdir, f"{name}.log"), "a", encoding="utf-8")
