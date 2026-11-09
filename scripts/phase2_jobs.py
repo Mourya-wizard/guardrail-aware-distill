@@ -40,7 +40,7 @@ for s in range(3):
 
 runs = [j["name"][6:] for j in jobs if j["name"].startswith("train_")]
 jobs += [evaluate(c, ["selfprefix_pool"], teacher=True) for c in ("teacher_prompt", "teacher_prompt_recovery")]
-jobs += [evaluate(r, ["selfprefix_pool", f"train_{r}"]) for r in runs]
+jobs += [evaluate(r, ["selfprefix_pool", f"train_{r}"]) for r in runs]  # student-size evals (8 GB)
 jobs += [evaluate(f"{r}@best", ["selfprefix_pool", f"train_{r}"]) for r in runs if r.startswith("opcd")]
 # latency needs the whole GPU budget, so the queue only starts it when nothing else is running
 jobs.append({"name": "latency", "cmd": [PY, "-m", "guardrail_distill.evaluation", "--phase", "phase2", "--cond", "latency", "--n_latency", "50"],

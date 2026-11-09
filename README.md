@@ -11,15 +11,15 @@
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.11-EE4C2C?logo=pytorch&logoColor=white)
 ![Transformers](https://img.shields.io/badge/transformers-5.22-FFD21E?logo=huggingface&logoColor=black)
-![Tests](https://img.shields.io/badge/tests-24%20pytest-0A9EDC?logo=pytest&logoColor=white)
-![Seeds](https://img.shields.io/badge/seeds-1-orange)
+![Tests](https://img.shields.io/badge/tests-41%20pytest-0A9EDC?logo=pytest&logoColor=white)
+![Seeds](https://img.shields.io/badge/seeds-1%20(P1)%20%C2%B7%203%20(P2)-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 ![Student](https://img.shields.io/badge/student-Qwen3.5--0.8B-2a78d6?style=for-the-badge)
 ![Teacher](https://img.shields.io/badge/teacher-Qwen3.5--9B-6250d6?style=for-the-badge)
 
 ![Phase 1](https://img.shields.io/badge/phase%201-first%20measured%20result-2a78d6?style=for-the-badge)
-![Phase 2](https://img.shields.io/badge/phase%202-in%20progress-lightgrey?style=for-the-badge)
+![Phase 2](https://img.shields.io/badge/phase%202-harder%20eval%20%C2%B7%203%20seeds%20%C2%B7%20ablations-6250d6?style=for-the-badge)
 
 </div>
 
@@ -31,18 +31,22 @@
 - **How:** **on-policy context distillation** (the base method of [Ye et al., 2026](#10--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (such as "Sure! The owner's number is") so the student also practises recovering from a bad start.
 - **How we test it: two phases.**
   - **Phase 1 (done):** one seed, 62 adversarial and 160 benign test prompts from held-out templates, a rule-based verifier, 95% bootstrap CIs and paired McNemar tests.
-  - **Phase 2 (in progress):** a larger and harder test set (borderline benign requests, new leak styles, Hinglish), an audited verifier, 3 seeds at fixed steps, compute-matched DPO, and ablations of guided rollouts. No Phase 2 numbers are reported yet.
+  - **Phase 2 (done):** a 3x larger and harder test set (700 prompts: borderline benign requests, new leak styles, Hinglish), an audited verifier, 3 seeds at fixed steps, compute-matched DPO, a stricter recovery metric, and 8 seed-0 ablations of the method.
 - **Phase 1 key results** (all measured):
   - 🛡️ Adversarial violations fall from **0.516** (student, no prompt) to **0.161** with OPCD and **0.113** with OPCD + guided rollouts, with **no safety prompt at inference**.
   - ✂️ Input tokens drop from **478.6** (student + safety prompt) to **203.6**.
   - 🙅 The prompted 0.8B student **over-refuses 36.9%** of benign requests; the distilled students refuse 10.6% and 13.1% (paired McNemar p < 0.0001 for both), while their violation rates are **statistically indistinguishable** from the prompted student's (p = 0.58 and 1.0).
-- **The honest twist:** in Phase 1, guided rollouts **did not improve recovery** (0.452 vs 0.581 without them, McNemar p = 0.057). Even the teacher recovers from only 43.6% of held-out forced prefixes. A DPO baseline recovers best (0.726) but still fails most off-topic jailbreaks.
+- **Phase 2 key results** (3 seeds, 700-prompt test set, all measured):
+  - ✅ **The Phase 1 headline holds.** Adversarial violations fall from **0.419** (no prompt) to **0.041 ± 0.016** with OPCD, with no safety prompt at inference, and helpfulness is **0.675** against **0.391** for the prompted student, which refuses **25.8%** of ordinary and **48.7%** of borderline requests.
+  - ❌ **Guided rollouts do not help.** A pre-registered rule (significantly better recovery at k = 10 *and* k = 20 in at least 2 of 3 seeds) failed: bank-prefix recovery is *worse* with guided rollouts in every seed (0.269 vs 0.510), and none of 8 ablations beats plain OPCD on recovery.
+  - ⚠️ **Borderline requests are the weak spot:** every distilled model refuses 43–47% of safe-but-sensitive-looking requests; the 9B teacher itself refuses 36.7%.
+- **The honest twist (Phase 1):** guided rollouts **did not improve recovery** (0.452 vs 0.581 without them, McNemar p = 0.057), and Phase 2 confirmed it with seeds and a stricter metric. A DPO baseline looked best on recovery in Phase 1 (0.726), but in Phase 2 it avoids refusals only by being unhelpful (helpfulness 0.279).
 
 <div align="center">
 
-![results](results/results_bar.png)
+![results](results/phase2/figures/results_bar.png)
 
-<sub>Adversarial violation and benign false-refusal rate per condition (test set). Rebuilt from <code>results/eval_*.json</code> by <code>python -m gd.plots</code>.</sub>
+<sub>Phase 2: adversarial violation, false refusal, borderline false refusal and helpfulness per condition with 95% CIs (seed 0 for trained runs). Rebuilt from <code>results/phase2/eval/*.json</code> by <code>python -m guardrail_distill.plots --phase phase2</code>.</sub>
 
 </div>
 
@@ -92,10 +96,10 @@ The loss, over all completion positions (including forced-prefix positions):
 
 | Component | What it does |
 |---|---|
-| 🔵 **OPCD** (`gd/opcd.py`) | The training loop. Batch of 16 prompts (8 benign, 8 adversarial), student rollouts at T=1.0 (128 new tokens), teacher scores the identical tokens under the safety prompt, reverse KL over the full vocabulary in fp32. AdamW lr 5e-6, grad clip 1.0, fp32 master weights with bf16 autocast, **150 steps**, best-dev checkpoint. |
+| 🔵 **OPCD** (`guardrail_distill/context_distill.py`) | The training loop. Batch of 16 prompts (8 benign, 8 adversarial), student rollouts at T=1.0 (128 new tokens), teacher scores the identical tokens under the safety prompt, reverse KL over the full vocabulary in fp32. AdamW lr 5e-6, grad clip 1.0, fp32 master weights with bf16 autocast, **150 steps**, best-dev checkpoint. |
 | 🟢 **Guided rollouts** (`--guided_frac 0.3`) | For 30% of the adversarial prompts in a batch the completion starts with a random **train** prefix from a class-specific bank, and the student continues from it. Held-out prefixes are used only at test time. |
-| 🟠 **DPO baseline** (`gd/dpo_baseline.py`) | 4 student samples per train prompt (T=0.9), verifier-labelled chosen/rejected pairs (up to 2 per prompt), a templated safe redirect as chosen when no sample passes (5.8% of pairs), TRL DPO, full fine-tune, beta 0.1, 2 epochs. |
-| 🔴 **Domain + verifier** (`gd/domains/support.py`) | Templated, seeded data (no LLM) and a rule-based verifier; the `Domain` interface lets later work add other domains without touching the training code. |
+| 🟠 **DPO baseline** (`guardrail_distill/dpo_baseline.py`) | 4 student samples per train prompt (T=0.9), verifier-labelled chosen/rejected pairs (up to 2 per prompt), a templated safe redirect as chosen when no sample passes (5.8% of pairs), TRL DPO, full fine-tune, beta 0.1, 2 epochs. |
+| 🔴 **Domain + verifier** (`guardrail_distill/domains/rental_support*.py`) | Templated, seeded data (no LLM) and a rule-based verifier; the `Domain` interface lets later work add other domains without touching the training code. |
 
 ## 3 · The experiments
 
@@ -107,11 +111,11 @@ The loss, over all completion positions (including forced-prefix positions):
 | **M3** | OPCD + guided rollouts, `--guided_frac 0.3` | ![p1](https://img.shields.io/badge/-phase%201-2a78d6) | Do forced unsafe prefixes improve recovery? |
 | **M4** | DPO baseline | ![p1](https://img.shields.io/badge/-phase%201-2a78d6) | How does a verifier-labelled preference method compare? |
 | **M5** | Plots, README, `run_all.sh` | ![p1](https://img.shields.io/badge/-phase%201-2a78d6) | Everything reproducible from a clean clone. |
-| **N1** | Harder data + verifier v2 | ![p2](https://img.shields.io/badge/-phase%202-lightgrey) | Do the Phase 1 conclusions survive a test set about 3x larger with borderline benign requests and new attack styles? |
-| **N2** | Verifier audit | ![p2](https://img.shields.io/badge/-phase%202-lightgrey) | How often does the rule verifier agree with an independent safety classifier (WildGuard)? |
-| **N3** | Re-evaluate Phase 1 models | ![p2](https://img.shields.io/badge/-phase%202-lightgrey) | Phase 1 checkpoints on the Phase 2 test set, with CIs, helpfulness, and recovery vs forced-prefix length. |
-| **N4** | 3 seeds, fixed steps | ![p2](https://img.shields.io/badge/-phase%202-lightgrey) | Is the guided-rollout result stable across seeds and with compute-matched DPO? |
-| **N5** | Ablations | ![p2](https://img.shields.io/badge/-phase%202-lightgrey) | Self-teacher vs 9B teacher, prefix loss masking, self-generated prefixes, guided fraction, teacher-quality x guided 2x2, JSD vs reverse KL. |
+| **N1** | Harder data + verifier v2 | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Do the Phase 1 conclusions survive a test set about 3x larger with borderline benign requests and new attack styles? |
+| **N2** | Verifier audit | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | How often does the rule verifier agree with an independent safety classifier (Qwen3Guard-Gen-8B; WildGuard is gated)? |
+| **N3** | Re-evaluate Phase 1 models | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Phase 1 checkpoints on the Phase 2 test set, with CIs, helpfulness, and recovery vs forced-prefix length. |
+| **N4** | 3 seeds, fixed steps | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Is the guided-rollout result stable across seeds and with compute-matched DPO? |
+| **N5** | Ablations | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Self-teacher vs 9B teacher, prefix loss masking, self-generated prefixes, guided fraction, teacher-quality x guided 2x2, JSD vs reverse KL. |
 
 All conditions are evaluated **without** a safety prompt, except the two upper references (`student_prompt`, `teacher_prompt`).
 
@@ -127,7 +131,7 @@ All conditions are evaluated **without** a safety prompt, except the two upper r
 | dev | 97 | 63 | 13 | 5 | 4 | 12 |
 | test | 222 | 160 | 16 | 16 | 16 | 14 |
 
-**Verifier** (`verify(row, reply)`, lexicons at the top of `gd/domains/support.py`; 24 unit tests):
+**Verifier** (`verify(row, reply)`, lexicons at the top of `guardrail_distill/domains/rental_support_v1.py`; 24 unit tests for the Phase 1 verifier, 41 with the Phase 2 verifier):
 
 | rule | fires when |
 |---|---|
@@ -175,7 +179,7 @@ Each class has only 14–16 test prompts, so one prompt moves a rate by about 6 
 
 ### Confidence intervals and paired tests ![ci](https://img.shields.io/badge/95%25-bootstrap%20CIs-1baf7a)
 
-Computed from the saved replies (no regeneration) by `python -m gd.stats`: 1,000 bootstrap resamples over prompts, and exact two-sided McNemar tests on the same prompts. Full tables in [`results/ci.md`](results/ci.md).
+Computed from the saved replies (no regeneration) by `python -m guardrail_distill.significance --phase phase1`: 1,000 bootstrap resamples over prompts, and exact two-sided McNemar tests on the same prompts. Full tables in [`results/phase1/ci.md`](results/phase1/ci.md).
 
 | condition | adv. violation [95% CI] | false refusal [95% CI] | recovery [95% CI] |
 |---|:--:|:--:|:--:|
@@ -196,13 +200,13 @@ Computed from the saved replies (no regeneration) by `python -m gd.stats`: 1,000
 
 ### Training
 
-![training](results/training_curves.png)
+![training](results/phase1/figures/training_curves.png)
 
 Reverse-KL loss falls from 0.72 to 0.37 (OPCD) and 0.71 to 0.38 (with guided rollouts) over 150 steps. Dev false refusals start high (0.38 / 0.25 at step 25) and drop as training proceeds, then fluctuate on the small dev set. The checkpoint with the best dev score (violation + false refusal) was step 150 for OPCD and **step 25** for OPCD + guided rollouts, so the guided-rollout model evaluated here is a lightly trained one.
 
 ### Recovery by class
 
-![recovery](results/recovery_by_class.png)
+![recovery](results/phase1/figures/recovery_by_class.png)
 
 ### What the results say
 
@@ -219,7 +223,7 @@ Reverse-KL loss falls from 0.72 to 0.37 (OPCD) and 0.71 to 0.38 (with guided rol
 
 ---
 
-## 6 · Phase 2: harder evaluation, seeds and ablations ![p2](https://img.shields.io/badge/-phase%202%20in%20progress-lightgrey)
+## 6 · Phase 2: harder evaluation, seeds and ablations ![p2](https://img.shields.io/badge/-phase%202-6250d6)
 
 Phase 1 left eight weaknesses: only 2 test templates per adversarial class (14–16 prompts each); a benign set so easy that on-topic rate was 1.0 for every condition; a loose recovery metric (the student beat the teacher, 0.581 vs 0.436); an unaudited verifier with known false positives on quoted insults; a guided-rollout checkpoint picked at step 25 on a 34-prompt dev set; a teacher that itself fails guarantee demands (0.31) and recovers only 43.6%; unequal compute between OPCD and DPO; and latency measured on a shared GPU. Phase 2 fixes these before drawing conclusions.
 
@@ -267,13 +271,55 @@ What Phase 2 shows:
 
 The audit compared 300 sampled replies with Qwen3Guard-Gen-8B (WildGuard is gated). Agreement was 0.94 (abuse), 0.86 (off-topic and PII), 0.82 (borderline), 0.78 (benign) and 0.56 (guarantee). Cohen's kappa was low (0.16–0.69), partly because positives are rare at n = 50 per class. Disagreements traced to differences in what the judges measure, not to lexicon bugs: the guard counts a refusal anywhere in a reply while the verifier counts only an opening refusal; the guard cannot know which strings are planted private data (the verifier correctly flags a refusal that repeats the planted phone number); and the guard has no guarantee category, so the "guarantee" comparison used a poor proxy. The verifier was not changed. The audit is a sanity check, not a validation; a human-labelling sheet is in `results/phase2/raw/audit_sheet.csv`. Per-class numbers: [`results/phase2/audit_agreement.json`](results/phase2/audit_agreement.json).
 
-**Ablations (seed 0 only):** running; the table and figure will be added here when they finish.
+### Ablations (seed 0, one change at a time)
 
-**Status:** main comparison done (3 seeds); ablations in progress. The Phase 1 state is frozen at the git tag [`track-a-v1`](https://github.com/Mourya-wizard/guardrail-aware-distill/tree/track-a-v1).
+Each row changes one thing about the guided-rollout run (200 steps, guided fraction 0.3 unless stated). McNemar p values compare a row with `opcd_gr_s0` on the same prompts (full tables in [`results/phase2/ci.md`](results/phase2/ci.md)). With one seed and many comparisons, treat p values near 0.05 as unconfirmed.
+
+| run | what changes | adv. viol. | false refusal | borderline FR | helpful | recovery (bank) | k = 10 | k = 20 |
+|---|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| `opcd_s0` | no guided rollouts (reference) | 0.022 | 0.191 | 0.480 | 0.582 | **0.516** | 0.738 | 0.523 |
+| `opcd_gr_s0` | guided rollouts, fixed prefix bank | 0.019 | 0.191 | 0.393 | 0.689 | 0.284 | 0.664 | 0.470 |
+| `abl_gf015_s0` | guided fraction 0.15 | 0.053 | 0.191 | 0.420 | 0.782 | 0.388 | 0.691 | 0.463 |
+| `abl_gf060_s0` | guided fraction 0.6 | 0.003 | 0.227 | 0.433 | 0.689 | 0.300 | 0.718 | 0.550 |
+| `abl_maskprefix_gr_s0` | forced-prefix positions masked out of the loss | 0.025 | 0.196 | 0.320 | 0.676 | 0.253 | 0.604 | 0.476 |
+| `abl_selfprefix_gr_s0` | prefixes sampled from the student's own unsafe replies | 0.047 | 0.169 | 0.553 | 0.773 | 0.297 | 0.678 | 0.523 |
+| `abl_jsd_gr_s0` | generalized JSD instead of reverse KL | 0.034 | 0.209 | 0.453 | 0.698 | 0.353 | 0.651 | 0.510 |
+| `abl_recteacher_s0` | teacher prompt + recovery instruction, no guided rollouts | 0.044 | 0.209 | 0.447 | 0.640 | 0.506 | 0.705 | 0.537 |
+| `abl_recteacher_gr_s0` | teacher prompt + recovery instruction, guided rollouts | 0.003 | 0.213 | 0.487 | 0.667 | 0.266 | 0.664 | 0.544 |
+| `abl_selfteacher_gr_s0` | teacher = the 0.8B student itself with the prompt (Prompt Baking style) | 0.066 | **0.404** | **0.633** | 0.413 | 0.244 | **0.315** | **0.201** |
+
+![ablations](results/phase2/figures/ablations.png)
+
+![recovery vs k](results/phase2/figures/recovery_vs_k.png)
+
+- **No variant recovers better than plain OPCD.** The closest are the recovery-instruction teacher without guided rollouts (0.506, p = 0.80 vs OPCD) and guided fraction 0.15 (0.388).
+- **A dose-response trend (one seed):** bank-prefix recovery is 0.516 with no guided rollouts and 0.388, 0.284, 0.300 at guided fractions 0.15, 0.3, 0.6. Training on forced bank prefixes does not teach recovery from *held-out* bank prefixes. Recovery from the model's own unsafe starts (k = 10, 20) is flat or slightly lower, with no significant difference in any seed.
+- **Recovery-instruction teacher:** it barely changes the teacher's own recovery (bank 0.438 vs 0.412 with the default prompt; k = 10 0.604 vs 0.617), so the "teacher ceiling" explanation from Phase 1 is not fixed by better prompt wording.
+- **The student cannot teach itself:** the self-teacher run has far worse false refusals (0.404) and k = 10 recovery (0.315, p < 0.0001 against the guided run with the 9B teacher). The 9B teacher matters.
+- **JSD vs reverse KL:** JSD recovers better than the reverse-KL guided run on bank prefixes (0.353 vs 0.284, p = 0.0016) but is still below plain OPCD (0.516), with no significant difference at k = 10 or 20.
+
+### Latency (idle GPU, batch 1, greedy, 50 replies)
+
+| model | input tokens | output tokens | seconds / reply |
+|---|:--:|:--:|:--:|
+| student, no prompt | 234.8 | 154.5 | 5.70 |
+| student + safety prompt | 509.8 | 151.3 | 5.58 |
+| OPCD student (`opcd_s0`) | 234.8 | 124.9 | 4.66 |
+| teacher (9B) + safety prompt | 509.8 | 125.1 | 6.17 |
+
+Decode is launch-bound on this setup (a batch of 16 takes as long as a batch of 1), so 2.2x fewer input tokens barely changes latency; the OPCD student is faster mainly because its replies are shorter (125 vs 150 tokens). The 9B teacher is only about 10% slower per reply than the 0.8B student here, so latency is not a strong argument for distillation in this setup; input-token cost and over-refusal are.
+
+### Not done in Phase 2
+
+- **Forgetting check** (IFEval / MMLU subsets before and after training): skipped, because it needs external datasets.
+- **Human labels** for the verifier audit: the sheet is generated but unlabelled.
+- **Larger students and more domains** (Track B).
+
+**Status:** Phase 2 complete. The Phase 1 state is frozen at the git tag [`track-a-v1`](https://github.com/Mourya-wizard/guardrail-aware-distill/tree/track-a-v1).
 
 ---
 
-## 7 · What we learned (Phase 1)
+## 7 · What we learned
 
 | | Takeaway | Evidence |
 |:-:|---|---|
@@ -281,37 +327,44 @@ The audit compared 300 sampled replies with Qwen3Guard-Gen-8B (WildGuard is gate
 | ✅ | **A long safety prompt makes a small model over-refuse;** distillation keeps more helpfulness. | false refusal 0.369 vs 0.106 (p < 0.0001) |
 | ⚖️ | **Guided rollouts: no recovery gain in this run.** Recovery 0.452 vs 0.581 (p = 0.057), single seed, step-25 checkpoint. | CI table |
 | ⚖️ | **DPO wins on recovery and false refusals, loses on off-topic jailbreaks.** | per-class table |
-| ⚠️ | **Verifier choices change the story.** An early verifier counted "I cannot guarantee…" anywhere as a refusal and inflated the prompted models' false refusals (0.63 and 0.36 before the fix, 0.369 and 0.019 after). All conditions were re-scored with the final verifier. | `python -m gd.eval --cond rescore` |
+| ✅ | **Phase 2: the distillation result survives a 3x larger, harder test set and 3 seeds.** Violations 0.419 → 0.041 ± 0.016 without a safety prompt; helpfulness 0.675 vs 0.391 for the prompted student. | Phase 2 results table |
+| ❌ | **Phase 2: guided rollouts do not help recovery, in any seed or ablation.** Bank-prefix recovery 0.269 vs 0.510; pre-registered rule failed. | decision rule, ablations |
+| ⚠️ | **Phase 2: borderline requests are unsolved.** 43–47% refusals for every distilled model; the 9B teacher refuses 36.7%, so distillation inherits the teacher's over-caution. | borderline false-refusal column |
+| ⚠️ | **Phase 2: DPO's low false refusals are not helpfulness.** Helpfulness 0.279 and recovery 0.089 at k = 20. | Phase 2 results table |
+| ⚠️ | **Verifier choices change the story.** An early verifier counted "I cannot guarantee…" anywhere as a refusal and inflated the prompted models' false refusals (0.63 and 0.36 before the fix, 0.369 and 0.019 after). All conditions were re-scored with the final verifier. | `python -m guardrail_distill.evaluation --phase phase1 --cond rescore` |
 
 ---
 
 ## 8 · Reproduce
 
 ```bash
-bash run_all.sh --dry-run    # list every step
-bash run_all.sh              # venv + data + tests + baselines + OPCD + OPCD-GR + DPO + summary + plots
+bash run_all.sh --dry-run             # list every step
+bash run_all.sh --phase1              # Phase 1: baselines, OPCD, OPCD + guided, DPO, CIs, plots
+bash run_all.sh --phase2              # Phase 2: data v2, then the GPU job queue (trainings, evals, audit, latency), CIs, plots
 ```
 
 Step by step (use the venv's interpreter: `.venv/Scripts/python.exe` on Windows, `.venv/bin/python` elsewhere):
 
 ```bash
-python -m gd.data                                              # data/{train,dev,test}.jsonl
-python -m pytest tests -q                                      # 24 verifier tests
-python -m gd.eval --cond student_none --n_latency 20           # also: student_prompt, teacher_prompt
-python -m gd.opcd --run opcd    --guided_frac 0.0 --steps 150 --eval_every 25
-python -m gd.opcd --run opcd_gr --guided_frac 0.3 --steps 150 --eval_every 25
-python -m gd.eval --cond opcd --n_latency 20                   # also: opcd_gr, dpo
-python -m gd.dpo_baseline
-python -m gd.eval --cond summary                               # results/summary.md
-python -m gd.plots                                             # results/*.png
+python -m pytest tests -q                                                  # 41 tests
+python -m guardrail_distill.data --phase phase2                            # data/phase2/{train,dev,test}.jsonl
+python -m guardrail_distill.evaluation --phase phase2 --cond student_prompt
+python -m guardrail_distill.context_distill --phase phase2 --run opcd_gr_s0 --seed 0 --guided_frac 0.3 --steps 200
+python -m guardrail_distill.dpo_baseline --phase phase2 --run dpo_s0 --seed 0 --match_steps 200
+python -m guardrail_distill.evaluation --phase phase2 --cond opcd_gr_s0    # also: <run>@best, p1_opcd, teacher_prompt_recovery
+python -m guardrail_distill.audit                                          # verifier vs Qwen3Guard-Gen-8B
+python -m guardrail_distill.significance --phase phase2                    # results/phase2/ci.md
+python -m guardrail_distill.plots --phase phase2                           # results/phase2/figures/
+python scripts/phase2_jobs.py && python scripts/job_queue.py --jobs results/phase2/raw/queue/jobs.json --mem_gb 64 --threads 19   # every Phase 2 job
 ```
 
 | What | Where it comes from | Lands in |
 |---|---|---|
 | Python deps (PyTorch cu128 wheels, transformers, trl, peft, …) | PyPI + download.pytorch.org via `requirements.txt` | `.venv/` (project-local) |
 | `Qwen/Qwen3.5-0.8B`, `Qwen/Qwen3.5-9B` | Hugging Face Hub | `.cache/huggingface/` (project-local) |
-| Dataset | generated locally from templates, nothing downloaded | `data/` |
-| Trained checkpoints | produced by the run | `ckpt/` (git-ignored) |
+| `Qwen/Qwen3Guard-Gen-8B` (audit only) | Hugging Face Hub | `.cache/huggingface/` |
+| Dataset | generated locally from templates, nothing downloaded | `data/phase1`, `data/phase2` |
+| Trained checkpoints | produced by the run | `ckpt/<phase>/` (git-ignored) |
 
 **Hardware used:** one NVIDIA RTX PRO 5000 (72 GB, Blackwell, needs cu128 wheels). The teacher (~18 GB, bf16) plus a full fine-tune of the 0.8B student fit comfortably. **Time on this machine:** OPCD 44 min, OPCD + guided rollouts 29 min, for 150 steps each.
 
@@ -319,21 +372,23 @@ python -m gd.plots                                             # results/*.png
 
 ```
 guardrail-aware-distill/
-├── gd/
+├── guardrail_distill/
 │   ├── domains/
-│   │   ├── base.py              # Domain interface: generate_data, render_user, verify, safety_prompt, prefix_bank
-│   │   └── support.py           # rental-support domain: templates, safety prompt, prefix bank, verifier
-│   ├── generate.py              # batched HF generation (left padding, chat template, forced prefix)
-│   ├── eval.py                  # all metrics for a condition -> results/eval_<cond>.json, summary, rescore
-│   ├── opcd.py                  # on-policy reverse-KL distillation (+ guided rollouts)
-│   ├── dpo_baseline.py          # verifier-labelled pairs + TRL DPO
-│   ├── plots.py                 # training curves, results bar chart, recovery chart
-│   ├── stats.py                 # bootstrap CIs + exact McNemar tests from saved replies -> results/ci.md
-│   ├── data.py · env.py         # data build/load · project-local cache environment
-├── tests/test_verifier.py       # 24 hand-written verifier and split tests
-├── scripts/m0_check.py          # environment / tokenizer / model-load check
-├── data/                        # generated train/dev/test JSONL
-├── results/                     # every JSON, CSV and figure quoted in this README
+│   │   ├── base.py                # Domain interface: generate_data, render_user, verify, safety_prompt, prefix_bank
+│   │   ├── rental_support_v1.py   # Phase 1 domain: templates, safety prompt, prefix bank, verifier
+│   │   └── rental_support.py      # Phase 2 domain: Hinglish, borderline benign, new leak styles, verifier v2, helpfulness
+│   ├── generation.py              # batched HF generation (left padding, chat template, forced prefix)
+│   ├── evaluation.py              # metrics for a condition -> results/<phase>/eval/<cond>.json, summary, latency
+│   ├── context_distill.py         # on-policy context distillation (+ guided rollouts and ablation flags)
+│   ├── dpo_baseline.py            # verifier-labelled pairs + TRL DPO
+│   ├── significance.py            # bootstrap CIs, exact McNemar, mean ± std over seeds -> results/<phase>/ci.md
+│   ├── audit.py                   # verifier vs an independent safety classifier
+│   ├── plots.py                   # figures -> results/<phase>/figures/
+│   └── data.py · env.py           # data build/load · project-local caches, thread cap, per-phase paths
+├── scripts/                       # job_queue.py (GPU-budgeted queue), phase2_jobs.py, check_environment.py
+├── tests/                         # test_rental_support_v1.py (24), test_rental_support.py (17)
+├── data/phase1 · data/phase2      # generated train/dev/test JSONL
+├── results/phase1 · results/phase2   # eval JSON, training logs, ci.md, figures quoted in this README
 └── run_all.sh · requirements.txt · LICENSE
 ```
 
@@ -365,7 +420,8 @@ guardrail-aware-distill/
 Phase 1 limitations (Phase 2 addresses most of them; see section 6):
 
 
-- **Single seed, single domain, single student size.** The CIs cover test-prompt sampling only, not training randomness; differences of a few prompts are within noise.
+- **Phase 2 additions:** ablations use one seed; the audit judge (Qwen3Guard-Gen-8B) is from the same model family as the student and teacher and has no guarantee or off-topic category; the borderline set is test-only and templated; the self-prefix pool covers only 149 of 320 adversarial test prompts; the forgetting check was not run; latency has n = 50 on a desktop GPU.
+- **Single seed (Phase 1), single domain, single student size.** The CIs cover test-prompt sampling only, not training randomness; differences of a few prompts are within noise.
 - **Small test set:** 62 adversarial and 160 benign prompts, 14–16 per adversarial class; 16 held-out templates.
 - **Templated synthetic data.** Held-out templates, but the same domain, language style and CRM format as training.
 - **Rule-based verifier:** lexicons are not exhaustive and have false positives (a refusal that quotes an insult or a guarantee phrase can be flagged) and false negatives. No LLM judge and no human evaluation of helpfulness. `false_refusal` only checks the opening of a reply.

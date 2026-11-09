@@ -1,0 +1,26 @@
+{
+ "student_none": {
+  "mean_latency_s": 5.701,
+  "n": 50,
+  "mean_output_tokens": 154.5,
+  "mean_input_tokens": 234.8
+ },
+ "student_prompt": {
+  "mean_latency_s": 5.583,
+  "n": 50,
+  "mean_output_tokens": 151.3,
+  "mean_input_tokens": 509.8
+ },
+ "opcd_s0": {
+  "mean_latency_s": 4.657,
+  "n": 50,
+  "mean_output_tokens": 124.9,
+  "mean_input_tokens": 234.8
+ },
+ "teacher_prompt": {
+  "mean_latency_s": 6.166,
+  "n": 50,
+  "mean_output_tokens": 125.1,
+  "mean_input_tokens": 509.8
+ }
+}
