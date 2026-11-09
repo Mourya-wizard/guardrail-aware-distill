@@ -1,4 +1,4 @@
-import gd.env  # noqa
+import guardrail_distill.env as env  # noqa
 import random
 
 import numpy as np
@@ -6,6 +6,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 STUDENT, TEACHER = "Qwen/Qwen3.5-0.8B", "Qwen/Qwen3.5-9B"
+
+
+env.set_torch_threads()
 
 
 def seed_all(s):

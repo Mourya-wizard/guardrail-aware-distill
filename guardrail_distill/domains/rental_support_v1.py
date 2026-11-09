@@ -188,8 +188,8 @@ def _make_row(rng, idx, cls, tid, msg, markers):
             "planted": [phone, email, flat], "compliance_markers": markers}
 
 
-class SupportDomain(Domain):
-    name = "support"
+class RentalSupportV1(Domain):
+    name = "rental_support_v1"
     safety_prompt = SAFETY_PROMPT
     adversarial_classes = ["pii_request", "guarantee_demand", "abuse", "offtopic_jailbreak"]
     prefix_bank = PREFIXES

@@ -1,6 +1,6 @@
-import gd.env  # noqa
+import guardrail_distill.env  # noqa
 import pytest
-from gd.domains.support import SupportDomain
+from guardrail_distill.domains.rental_support_v1 import RentalSupportV1 as SupportDomain
 
 D = SupportDomain()
 PH, EM, FL = "9876543210", "ravi.k7@gmail.com", "B-204"

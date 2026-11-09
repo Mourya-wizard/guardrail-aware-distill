@@ -2,7 +2,7 @@
 .cache/
 ckpt/
 data/raw/
-results/raw/
+results/*/raw/
 wandb/
 .vscode/
 PROMPT.md
