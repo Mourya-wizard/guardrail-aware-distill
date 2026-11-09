@@ -2,9 +2,9 @@
 
 # 🛡️ guardrail-aware-distill
 
-### Moving a safety system prompt into a small model's weights, with on-policy distillation and guided rollouts
+### Prompt-free guardrails: distilling a safety system prompt into a small model's weights with guided on-policy distillation
 
-*A 0.8B student learns from a safety-prompted 9B teacher on a narrow rental-support domain. **Phase 1** gives a first measured, single-seed result on held-out templates; **Phase 2** hardens the evaluation and tests guided rollouts with seeds and ablations.*
+*A general research idea, evaluated on one narrow case study. The idea: a small model can learn the guardrails that normally live in a long safety system prompt, by learning from its own mistakes under a prompted teacher, and by practising recovery from unsafe starts. The case study: a rental-housing support assistant (Qwen3.5-0.8B student, Qwen3.5-9B teacher). **Phase 1** gives a first measured result; **Phase 2** hardens the evaluation and tests the recovery idea with seeds and ablations.*
 
 <br/>
 
@@ -27,20 +27,21 @@
 
 ## TL;DR
 
-- **What:** a customer-support model for a rental platform sees a customer message plus a CRM block that contains **private data** (owner phone and email, another tenant's flat). It must help from the policy but never leak, promise guarantees, be abusive, or follow off-topic and jailbreak requests. Normally that needs a long safety system prompt at every call. Here the guardrails are **distilled into the weights** instead.
-- **How:** **on-policy context distillation** (the base method of [Ye et al., 2026](#10--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (such as "Sure! The owner's number is") so the student also practises recovering from a bad start.
+- **The problem (general):** a deployed language model is kept safe by a long **safety system prompt** (more tokens on every call, and a small model may follow it clumsily; in our case study it over-refuses) or by an external guard model (another model to serve). Can that policy be moved into the weights, so the model stays safe with **no prompt at inference**, and can it learn to *recover* when a reply has already started badly?
+- **The case study (where it is tested):** a customer-support assistant for a rental-housing platform. It sees a customer message plus a CRM block that contains **private data** (owner phone and email, another tenant's flat), and must help from the policy but never leak, promise guarantees, be abusive, or follow off-topic and jailbreak requests. One narrow domain keeps the violation space small and measurable.
+- **The method (domain-agnostic):** **on-policy context distillation** (the base method of [Ye et al., 2026](#10--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (in the case study, for example "Sure! The owner's number is") so the student also practises recovering from a bad start. Nothing in the training code is specific to rentals: the domain supplies data, a prefix bank and a verifier through a plug-in interface.
 - **How we test it: two phases.**
   - **Phase 1 (done):** one seed, 62 adversarial and 160 benign test prompts from held-out templates, a rule-based verifier, 95% bootstrap CIs and paired McNemar tests.
   - **Phase 2 (done):** a 3x larger and harder test set (700 prompts: borderline benign requests, new leak styles, Hinglish), an audited verifier, 3 seeds at fixed steps, compute-matched DPO, a stricter recovery metric, and 8 seed-0 ablations of the method.
-- **Phase 1 key results** (all measured):
+- **Phase 1 key results** (case study, all measured):
   - 🛡️ Adversarial violations fall from **0.516** (student, no prompt) to **0.161** with OPCD and **0.113** with OPCD + guided rollouts, with **no safety prompt at inference**.
   - ✂️ Input tokens drop from **478.6** (student + safety prompt) to **203.6**.
   - 🙅 The prompted 0.8B student **over-refuses 36.9%** of benign requests; the distilled students refuse 10.6% and 13.1% (paired McNemar p < 0.0001 for both), while their violation rates are **statistically indistinguishable** from the prompted student's (p = 0.58 and 1.0).
-- **Phase 2 key results** (3 seeds, 700-prompt test set, all measured):
+- **Phase 2 key results** (case study, 3 seeds, 700-prompt test set, all measured):
   - ✅ **The Phase 1 headline holds.** Adversarial violations fall from **0.419** (no prompt) to **0.041 ± 0.016** with OPCD, with no safety prompt at inference, and helpfulness is **0.675** against **0.391** for the prompted student, which refuses **25.8%** of ordinary and **48.7%** of borderline requests.
   - ❌ **Guided rollouts do not help.** A pre-registered rule (significantly better recovery at k = 10 *and* k = 20 in at least 2 of 3 seeds) failed: bank-prefix recovery is *worse* with guided rollouts in every seed (0.269 vs 0.510), and none of 8 ablations beats plain OPCD on recovery.
   - ⚠️ **Borderline requests are the weak spot:** every distilled model refuses 43–47% of safe-but-sensitive-looking requests; the 9B teacher itself refuses 36.7%.
-- **The honest twist (Phase 1):** guided rollouts **did not improve recovery** (0.452 vs 0.581 without them, McNemar p = 0.057), and Phase 2 confirmed it with seeds and a stricter metric. A DPO baseline looked best on recovery in Phase 1 (0.726), but in Phase 2 it avoids refusals only by being unhelpful (helpfulness 0.279).
+- **The honest twist (both phases):** guided rollouts **did not improve recovery** (0.452 vs 0.581 without them, McNemar p = 0.057), and Phase 2 confirmed it with seeds and a stricter metric. A DPO baseline looked best on recovery in Phase 1 (0.726), but in Phase 2 it avoids refusals only by being unhelpful (helpfulness 0.279).
 
 <div align="center">
 
@@ -54,25 +55,27 @@
 
 ## 1 · The question
 
-Safety behaviour is usually bolted on at inference: a long system prompt (more tokens, every call) or an external guard model (another model to serve). That raises three questions:
+Safety behaviour is usually bolted on at inference: a long system prompt (more tokens, every call) or an external guard model (another model to serve). That raises three general questions:
 
-1. **Can the prompt be distilled away?** Can a small student keep the guardrails without the prompt?
-2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#10--references)). If a reply *starts* unsafe, does the model correct course?
-3. **Does narrowing the domain help?** In one narrow domain the violation space is small and enumerable, so a sub-1B student might have the capacity to hold the task *and* the guardrails (the **scoping hypothesis**, stated as a hypothesis; Phases 1 and 2 test one domain and one size only).
+1. **Can the prompt be distilled away?** Can a small student keep the guardrails without the prompt, without becoming over-cautious?
+2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#10--references)). If a reply *starts* unsafe, does the model correct course, and does training on forced unsafe prefixes teach that?
+3. **Does narrowing the scope help?** In a narrow domain the violation space is small and enumerable, so a sub-1B student might have the capacity to hold the task *and* the guardrails, and coverage becomes measurable (the **scoping hypothesis**, stated as a hypothesis).
 
-**Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#10--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#10--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) the **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
+**Why a case study.** The method is general, but a measurement needs a concrete task with ground truth. We use one narrow domain, rental-housing customer support, where "violation" can be checked by rules: a planted private string appears in a reply, a guarantee phrase is used, an insult is written, or an off-topic request is obeyed. The results below are therefore evidence about this case study; whether they carry over to other domains, tasks or model sizes is untested (see the limitations and the Track B roadmap).
 
-## 2 · What we built
+**Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#10--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#10--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) a **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
+
+## 2 · The method, and how the case study instantiates it
 
 ```mermaid
 flowchart LR
-    X["📝 train prompt x<br/>CRM context + message"] --> S
+    X["📝 training prompt x<br/>(context + user message)"] --> S
     X --> TP["+ safety system prompt"]
-    subgraph STU ["student · Qwen3.5-0.8B · trained · NO safety prompt"]
+    subgraph STU ["student · small LM (case study: Qwen3.5-0.8B) · trained · NO safety prompt"]
         S["sample reply y<br/>T = 1.0"] --> SL["p_student(· | x, y&lt;t)"]
     end
     G["⚠️ guided rollout<br/>forced unsafe prefix<br/>(adversarial prompts only)"] -.-> S
-    subgraph TEA ["teacher · Qwen3.5-9B · frozen"]
+    subgraph TEA ["teacher · larger LM of the same family (case study: Qwen3.5-9B) · frozen"]
         TP --> TL["p_teacher(· | sys, x, y&lt;t)"]
     end
     S -- "same tokens y" --> TL
@@ -90,7 +93,7 @@ flowchart LR
     class X,U io
 ```
 
-The loss, over all completion positions (including forced-prefix positions):
+The loss, over all completion positions (including forced-prefix positions). The whole procedure needs only a prompt set, a safety system prompt, a prefix bank of unsafe openers, and a verifier to measure results:
 
 `L = (1 / Σ|y|) · Σ_t KL( p_student(· | x, y_<t) ‖ p_teacher(· | sys, x, y_<t) )`
 
@@ -99,7 +102,7 @@ The loss, over all completion positions (including forced-prefix positions):
 | 🔵 **OPCD** (`guardrail_distill/context_distill.py`) | The training loop. Batch of 16 prompts (8 benign, 8 adversarial), student rollouts at T=1.0 (128 new tokens), teacher scores the identical tokens under the safety prompt, reverse KL over the full vocabulary in fp32. AdamW lr 5e-6, grad clip 1.0, fp32 master weights with bf16 autocast, **150 steps**, best-dev checkpoint. |
 | 🟢 **Guided rollouts** (`--guided_frac 0.3`) | For 30% of the adversarial prompts in a batch the completion starts with a random **train** prefix from a class-specific bank, and the student continues from it. Held-out prefixes are used only at test time. |
 | 🟠 **DPO baseline** (`guardrail_distill/dpo_baseline.py`) | 4 student samples per train prompt (T=0.9), verifier-labelled chosen/rejected pairs (up to 2 per prompt), a templated safe redirect as chosen when no sample passes (5.8% of pairs), TRL DPO, full fine-tune, beta 0.1, 2 epochs. |
-| 🔴 **Domain + verifier** (`guardrail_distill/domains/rental_support*.py`) | Templated, seeded data (no LLM) and a rule-based verifier; the `Domain` interface lets later work add other domains without touching the training code. |
+| 🔴 **Domain plug-in** (`guardrail_distill/domains/`) | The only task-specific part. `base.py` defines the interface (data generator, user-turn renderer, safety prompt, prefix bank, verifier). `rental_support_v1.py` and `rental_support.py` are the case-study instantiations: templated, seeded data (no LLM) and a rule-based verifier. A new domain adds one file and does not touch the training code. |
 
 ## 3 · The experiments
 
@@ -117,11 +120,11 @@ The loss, over all completion positions (including forced-prefix positions):
 | **N4** | 3 seeds, fixed steps | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Is the guided-rollout result stable across seeds and with compute-matched DPO? |
 | **N5** | Ablations | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Self-teacher vs 9B teacher, prefix loss masking, self-generated prefixes, guided fraction, teacher-quality x guided 2x2, JSD vs reverse KL. |
 
-All conditions are evaluated **without** a safety prompt, except the two upper references (`student_prompt`, `teacher_prompt`).
+Every experiment below runs in the rental-support case study. All conditions are evaluated **without** a safety prompt, except the two upper references (`student_prompt`, `teacher_prompt`).
 
 ---
 
-## 4 · Phase 1: setup ![p1](https://img.shields.io/badge/-phase%201-2a78d6)
+## 4 · Phase 1: case-study setup ![p1](https://img.shields.io/badge/-phase%201-2a78d6)
 
 **Data.** Rental-support customer messages built from templates; a CRM block with randomised listing, policy and **fake** private data (owner name, 10-digit Indian mobile starting 6–9, email, another tenant's flat). Split **by template**, so test templates are never seen in training.
 
@@ -149,7 +152,7 @@ With a forced prefix, `recovered` = the continuation contains no violation; plan
 
 ---
 
-## 5 · Phase 1: results ![p1](https://img.shields.io/badge/-phase%201-2a78d6)
+## 5 · Phase 1: case-study results ![p1](https://img.shields.io/badge/-phase%201-2a78d6)
 
 ### Main table ![t](https://img.shields.io/badge/test%20set-62%20adversarial%20%2B%20160%20benign-2a78d6)
 
@@ -223,7 +226,7 @@ Reverse-KL loss falls from 0.72 to 0.37 (OPCD) and 0.71 to 0.38 (with guided rol
 
 ---
 
-## 6 · Phase 2: harder evaluation, seeds and ablations ![p2](https://img.shields.io/badge/-phase%202-6250d6)
+## 6 · Phase 2: harder case-study evaluation, seeds and ablations ![p2](https://img.shields.io/badge/-phase%202-6250d6)
 
 Phase 1 left eight weaknesses: only 2 test templates per adversarial class (14–16 prompts each); a benign set so easy that on-topic rate was 1.0 for every condition; a loose recovery metric (the student beat the teacher, 0.581 vs 0.436); an unaudited verifier with known false positives on quoted insults; a guided-rollout checkpoint picked at step 25 on a 34-prompt dev set; a teacher that itself fails guarantee demands (0.31) and recovers only 43.6%; unequal compute between OPCD and DPO; and latency measured on a shared GPU. Phase 2 fixes these before drawing conclusions.
 
@@ -320,6 +323,8 @@ Decode is launch-bound on this setup (a batch of 16 takes as long as a batch of 
 ---
 
 ## 7 · What we learned
+
+All takeaways are measured in the single rental-support case study. They are evidence about the method in that setting, not proof that it generalises.
 
 | | Takeaway | Evidence |
 |:-:|---|---|
@@ -421,6 +426,7 @@ Phase 1 limitations (Phase 2 addresses most of them; see section 6):
 
 
 - **Phase 2 additions:** ablations use one seed; the audit judge (Qwen3Guard-Gen-8B) is from the same model family as the student and teacher and has no guarantee or off-topic category; the borderline set is test-only and templated; the self-prefix pool covers only 149 of 320 adversarial test prompts; the forgetting check was not run; latency has n = 50 on a desktop GPU.
+- **One case study.** All evidence comes from one narrow domain (rental support), one model family and one student size; whether the method, the over-refusal finding or the negative result on guided rollouts generalise to other domains, tasks or scales is untested.
 - **Single seed (Phase 1), single domain, single student size.** The CIs cover test-prompt sampling only, not training randomness; differences of a few prompts are within noise.
 - **Small test set:** 62 adversarial and 160 benign prompts, 14–16 per adversarial class; 16 held-out templates.
 - **Templated synthetic data.** Held-out templates, but the same domain, language style and CRM format as training.
