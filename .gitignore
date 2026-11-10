@@ -17,3 +17,5 @@ PROMPT_PHASE2.md
 P3_guardrail_distill_phase3_validation_prompt.md
 PROMPT_PHASE3.md
 data/external/
+.claude/
+.pytest_cache/
