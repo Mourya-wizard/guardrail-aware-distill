@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Reproduce the experiments. Usage: bash run_all.sh [--phase1] [--phase2] [--dry-run]   (default: both phases)
+# Reproduce the experiments. Usage: bash run_all.sh [--phase1] [--phase2] [--phase3] [--dry-run]   (default: all phases)
 set -euo pipefail
 cd "$(dirname "$0")"
-DRY=0; P1=0; P2=0
+DRY=0; P1=0; P2=0; P3=0
 for a in "$@"; do
-  case "$a" in --dry-run) DRY=1 ;; --phase1) P1=1 ;; --phase2) P2=1 ;; *) echo "unknown arg $a"; exit 1 ;; esac
+  case "$a" in --dry-run) DRY=1 ;; --phase1) P1=1 ;; --phase2) P2=1 ;; --phase3) P3=1 ;; *) echo "unknown arg $a"; exit 1 ;; esac
 done
-if [ "$P1" = 0 ] && [ "$P2" = 0 ]; then P1=1; P2=1; fi
+if [ "$P1" = 0 ] && [ "$P2" = 0 ] && [ "$P3" = 0 ]; then P1=1; P2=1; P3=1; fi
 export HF_HOME="$PWD/.cache/huggingface" TORCH_HOME="$PWD/.cache/torch" XDG_CACHE_HOME="$PWD/.cache" MPLCONFIGDIR="$PWD/.cache/mpl" WANDB_DISABLED=true PIP_REQUIRE_VIRTUALENV=1
 venv_bins() { if [ -d .venv/Scripts ]; then PY=.venv/Scripts/python.exe; PIP=.venv/Scripts/pip.exe; else PY=.venv/bin/python; PIP=.venv/bin/pip; fi; }
 venv_bins
@@ -42,4 +42,12 @@ if [ "$P2" = 1 ]; then
   run $PY $M.evaluation --phase phase2 --cond summary
   run $PY $M.significance --phase phase2
   run $PY $M.plots --phase phase2
+fi
+
+if [ "$P3" = 1 ]; then
+  echo "== Phase 3: verifier vs public human labels, forgetting check (MMLU, IFEval) on base + the 9 Phase 2 checkpoints"
+  run $PY scripts/phase3_jobs.py
+  run $PY scripts/job_queue.py --jobs results/phase3/raw/queue/jobs.json --mem_gb 64 --threads 19
+  run $PY $M.forgetting --aggregate
+  run $PY $M.rescore_refusal
 fi

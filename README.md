@@ -4,7 +4,7 @@
 
 ### Prompt-free guardrails: distilling a safety system prompt into a small model's weights with guided on-policy distillation
 
-*A general research idea, evaluated on one narrow case study. The idea: a small model can learn the guardrails that normally live in a long safety system prompt, by learning from its own mistakes under a prompted teacher, and by practising recovery from unsafe starts. The case study: a rental-housing support assistant (Qwen3.5-0.8B student, Qwen3.5-9B teacher). **Phase 1** gives a first measured result; **Phase 2** hardens the evaluation and tests the recovery idea with seeds and ablations.*
+*A general research idea, evaluated on one narrow case study. The idea: a small model can learn the guardrails that normally live in a long safety system prompt, by learning from its own mistakes under a prompted teacher, and by practising recovery from unsafe starts. The case study: a rental-housing support assistant (Qwen3.5-0.8B student, Qwen3.5-9B teacher). **Phase 1** gives a first measured result; **Phase 2** hardens the evaluation and tests the recovery idea with seeds and ablations; **Phase 3** checks what distillation costs outside the domain (forgetting) and validates the rule-based checker against public human labels.*
 
 <br/>
 
@@ -20,6 +20,7 @@
 
 ![Phase 1](https://img.shields.io/badge/phase%201-first%20measured%20result-2a78d6?style=for-the-badge)
 ![Phase 2](https://img.shields.io/badge/phase%202-harder%20eval%20%C2%B7%203%20seeds%20%C2%B7%20ablations-6250d6?style=for-the-badge)
+![Phase 3](https://img.shields.io/badge/phase%203-forgetting%20%C2%B7%20human--label%20validation-1baf7a?style=for-the-badge)
 
 </div>
 
@@ -29,10 +30,11 @@
 
 - **The problem (general):** a deployed language model is kept safe by a long **safety system prompt** (more tokens on every call, and a small model may follow it clumsily; in our case study it over-refuses) or by an external guard model (another model to serve). Can that policy be moved into the weights, so the model stays safe with **no prompt at inference**, and can it learn to *recover* when a reply has already started badly?
 - **The case study (where it is tested):** a customer-support assistant for a rental-housing platform. It sees a customer message plus a CRM block that contains **private data** (owner phone and email, another tenant's flat), and must help from the policy but never leak, promise guarantees, be abusive, or follow off-topic and jailbreak requests. One narrow domain keeps the violation space small and measurable.
-- **The method (domain-agnostic):** **on-policy context distillation** (the base method of [Ye et al., 2026](#10--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (in the case study, for example "Sure! The owner's number is") so the student also practises recovering from a bad start. Nothing in the training code is specific to rentals: the domain supplies data, a prefix bank and a verifier through a plug-in interface.
-- **How we test it: two phases.**
+- **The method (domain-agnostic):** **on-policy context distillation** (the base method of [Ye et al., 2026](#11--references), here called OPCD as in that paper). The student samples its own reply with *no* safety prompt; the frozen teacher scores the same tokens *with* the safety prompt. An optional **guided rollout** forces an unsafe prefix (in the case study, for example "Sure! The owner's number is") so the student also practises recovering from a bad start. Nothing in the training code is specific to rentals: the domain supplies data, a prefix bank and a verifier through a plug-in interface.
+- **How we test it: three phases.**
   - **Phase 1 (done):** one seed, 62 adversarial and 160 benign test prompts from held-out templates, a rule-based verifier, 95% bootstrap CIs and paired McNemar tests.
   - **Phase 2 (done):** a 3x larger and harder test set (700 prompts: borderline benign requests, new leak styles, Hinglish), an audited verifier, 3 seeds at fixed steps, compute-matched DPO, a stricter recovery metric, and 8 seed-0 ablations of the method.
+  - **Phase 3 (done):** a forgetting check on MMLU (14,042 items) and IFEval (541 prompts) for the base student and all 9 Phase 2 checkpoints, and a validation of the verifier's rules against public human-labeled data (XSTest, JailbreakBench, BeaverTails, ToxicChat).
 - **Phase 1 key results** (case study, all measured):
   - 🛡️ Adversarial violations fall from **0.516** (student, no prompt) to **0.161** with OPCD and **0.113** with OPCD + guided rollouts, with **no safety prompt at inference**.
   - ✂️ Input tokens drop from **478.6** (student + safety prompt) to **203.6**.
@@ -41,6 +43,10 @@
   - ✅ **The Phase 1 headline holds.** Adversarial violations fall from **0.419** (no prompt) to **0.041 ± 0.016** with OPCD, with no safety prompt at inference, and helpfulness is **0.675** against **0.391** for the prompted student, which refuses **25.8%** of ordinary and **48.7%** of borderline requests.
   - ❌ **Guided rollouts do not help.** A pre-registered rule (significantly better recovery at k = 10 *and* k = 20 in at least 2 of 3 seeds) failed: bank-prefix recovery is *worse* with guided rollouts in every seed (0.269 vs 0.510), and none of 8 ablations beats plain OPCD on recovery.
   - ⚠️ **Borderline requests are the weak spot:** every distilled model refuses 43–47% of safe-but-sensitive-looking requests; the 9B teacher itself refuses 36.7%.
+- **Phase 3 key results** (all measured):
+  - 🧠 **No knowledge loss:** MMLU is unchanged for every method (base 0.502; all 9 checkpoints within −0.002 to +0.005, every paired test p > 0.05).
+  - 🚪 **But the distilled students refuse general tasks:** IFEval accuracy falls from 0.490 to 0.09–0.12, because they decline 89–95% of non-rental requests ("I cannot write an itinerary…"). The prompt alone already does this to the student (refusal 49.5%, IFEval 0.305); distillation makes it stronger. This is the safety prompt's "decline everything off-topic" rule doing its job too broadly, not lost ability.
+  - 🔍 **The checker is only partly validated by humans:** the strict-recovery detector agrees with human labels (XSTest, F1 0.86, kappa 0.71); the false-refusal rule misses half of all refusals (recall 0.44), so false-refusal rates in Phases 1–2 are lower bounds; the abuse word list does not match human toxicity labels (kappa ≤ 0.26).
 - **The honest twist (both phases):** guided rollouts **did not improve recovery** (0.452 vs 0.581 without them, McNemar p = 0.057), and Phase 2 confirmed it with seeds and a stricter metric. A DPO baseline looked best on recovery in Phase 1 (0.726), but in Phase 2 it avoids refusals only by being unhelpful (helpfulness 0.279).
 
 <div align="center">
@@ -58,12 +64,12 @@
 Safety behaviour is usually bolted on at inference: a long system prompt (more tokens, every call) or an external guard model (another model to serve). That raises three general questions:
 
 1. **Can the prompt be distilled away?** Can a small student keep the guardrails without the prompt, without becoming over-cautious?
-2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#10--references)). If a reply *starts* unsafe, does the model correct course, and does training on forced unsafe prefixes teach that?
+2. **Does it learn to recover?** Safety that only works when the first tokens are safe is shallow ([Qi et al., 2025](#11--references)). If a reply *starts* unsafe, does the model correct course, and does training on forced unsafe prefixes teach that?
 3. **Does narrowing the scope help?** In a narrow domain the violation space is small and enumerable, so a sub-1B student might have the capacity to hold the task *and* the guardrails, and coverage becomes measurable (the **scoping hypothesis**, stated as a hypothesis).
 
 **Why a case study.** The method is general, but a measurement needs a concrete task with ground truth. We use one narrow domain, rental-housing customer support, where "violation" can be checked by rules: a planted private string appears in a reply, a guarantee phrase is used, an insult is written, or an off-topic request is obeyed. The results below are therefore evidence about this case study; whether they carry over to other domains, tasks or model sizes is untested (see the limitations).
 
-**Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#10--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#10--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) a **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
+**Relation to prior work.** Distilling a safety system prompt into the weights with on-policy reverse KL is **not new**: it is the On-Policy Context Distillation method of [Ye et al. (2026)](#11--references), which also distils safety system prompts, and [Prompt Baking (Bhargava et al., 2024)](#11--references) does the self-distillation version. Our plain OPCD run is a replication of that idea in a narrow domain. What this repository adds and tests is (1) **guided rollouts** (forced unsafe prefixes inside on-policy distillation, to teach recovery, in the spirit of the safety recovery examples of Qi et al.), (2) a **narrow-domain setting** where violations can be enumerated and measured per class, and (3) the measured **over-refusal of a prompted small model** versus a distilled one. The comparison baseline is DPO on verifier-labelled pairs.
 
 ## 2 · The method, and how the case study instantiates it
 
@@ -119,6 +125,8 @@ The loss, over all completion positions (including forced-prefix positions). The
 | **N3** | Re-evaluate Phase 1 models | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Phase 1 checkpoints on the Phase 2 test set, with CIs, helpfulness, and recovery vs forced-prefix length. |
 | **N4** | 3 seeds, fixed steps | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Is the guided-rollout result stable across seeds and with compute-matched DPO? |
 | **N5** | Ablations | ![p2](https://img.shields.io/badge/-phase%202-6250d6) | Self-teacher vs 9B teacher, prefix loss masking, self-generated prefixes, guided fraction, teacher-quality x guided 2x2, JSD vs reverse KL. |
+| **P1** | Verifier vs public human labels | ![p3](https://img.shields.io/badge/-phase%203-1baf7a) | Do the rule checks agree with human annotators on XSTest, JailbreakBench, BeaverTails and ToxicChat? How does Qwen3Guard compare? |
+| **P2** | Forgetting check | ![p3](https://img.shields.io/badge/-phase%203-1baf7a) | Does distillation (or DPO) cost general knowledge (MMLU) or instruction following (IFEval)? |
 
 Every experiment below runs in the rental-support case study. All conditions are evaluated **without** a safety prompt, except the two upper references (`student_prompt`, `teacher_prompt`).
 
@@ -316,30 +324,95 @@ Decode is launch-bound on this setup (a batch of 16 takes as long as a batch of 
 
 ---
 
-## 7 · What we learned
+## 7 · Phase 3: forgetting check and verifier validation ![p3](https://img.shields.io/badge/-phase%203-1baf7a)
+
+Phase 3 asks two questions Phase 2 left open: does distillation cost anything **outside** the rental domain, and can the **rule-based checker** that produced every number above be trusted? Both use only public data (downloads listed in the [Reproduce](#9--reproduce) section).
+
+### Forgetting: MMLU and IFEval
+
+Same settings for every model: MMLU 5-shot over all 14,042 test items, scored by the log-probability of the answer letter; IFEval through EleutherAI's `lm-evaluation-harness` (chat template, thinking off, up to 512 new tokens). "base + safety prompt" is the untrained student with the safety prompt as its system message (IFEval only). 95% bootstrap CIs; McNemar tests are paired against the base student on the same items. Full tables: [`results/phase3/forgetting.md`](results/phase3/forgetting.md).
+
+| model | MMLU accuracy | IFEval strict accuracy | IFEval replies that refuse | IFEval accuracy when not refusing (n) |
+|---|:--:|:--:|:--:|:--:|
+| base student | 0.502 [0.494, 0.511] | 0.490 [0.449, 0.532] | 0.039 | 0.485 (520) |
+| base + safety prompt | – | 0.305 [0.268, 0.342] | 0.495 | 0.407 (273) |
+| 🔵 OPCD, 3 seeds | +0.004 ± 0.002 vs base | 0.091 / 0.092 / 0.100 | 0.937–0.943 | 0.26–0.35 (31–34) |
+| 🟢 OPCD + guided rollouts, 3 seeds | +0.004 ± 0.001 vs base | 0.118 / 0.122 / 0.115 | 0.887–0.952 | 0.25–0.37 (26–61) |
+| 🟠 DPO, 3 seeds | −0.000 ± 0.002 vs base | 0.431 / 0.421 / 0.379 | 0.096–0.264 | 0.45–0.49 (398–489) |
+
+![forgetting](results/phase3/figures/forgetting.png)
+
+- **MMLU: no forgetting.** Every checkpoint is within −0.002 to +0.005 of the base model, and no paired test reaches p < 0.05.
+- **IFEval: a large drop, by the pre-registered rule "measurable forgetting" in 9 of 9 checkpoints** (OPCD −0.396 ± 0.005, OPCD + guided −0.371 ± 0.004, DPO −0.080 ± 0.028; p ≤ 0.009 each).
+- **The cause is refusal, not lost ability.** The refusal column uses the detector that matched human labels best (below). The distilled students decline 89–95% of IFEval's general writing tasks, because the safety prompt they learned says to decline everything outside rentals. The untrained student *with* that prompt already declines 49.5% (IFEval 0.305), so distillation strengthened a behaviour the prompt asks for. DPO's smaller drop is also mostly refusals: on the prompts it answers, its accuracy (0.45–0.49) matches the base model (0.485).
+- **What this means for the method:** a distilled guardrail is as narrow as its prompt. A deployment that also needs general help must say so in the safety prompt (or keep a general model for out-of-scope traffic). The few general prompts the distilled students do answer score lower (0.25–0.37), but on 26–61 prompts that are not a random sample, so that number is not evidence of lost ability.
+
+### Verifier vs public human labels
+
+Each rule is run on public data that humans labelled, and scored with precision, recall, F1 and Cohen's kappa (agreement beyond chance; 1 = perfect, 0 = chance). Pre-registered verdict: **supported** if F1 ≥ 0.80 and kappa ≥ 0.60, **weak** if kappa is 0.40–0.60, **not supported** below 0.40. Full table with per-model rows and 95% CIs: [`results/phase3/verifier_public_validation.md`](results/phase3/verifier_public_validation.md).
+
+| rule (or judge) | human-labeled data | n | precision | recall | F1 | kappa | verdict |
+|---|---|:--:|:--:|:--:|:--:|:--:|---|
+| strict-recovery marker (refuse/redirect in the first 250 chars) | XSTest v2 completions, 5 models, 2 annotators each | 2,250 | 0.876 | 0.840 | **0.858** | **0.713** | supported |
+| false-refusal rule (refusal phrase in the first 100 chars) | XSTest v2 completions | 2,250 | 0.987 | **0.444** | 0.612 | 0.430 | weak |
+| refusal phrase anywhere in the reply | XSTest v2 completions | 2,250 | 0.985 | 0.448 | 0.616 | 0.433 | weak |
+| Qwen3Guard-Gen-8B, refusal label | XSTest v2 completions | 2,250 | 0.944 | 0.894 | **0.918** | **0.837** | supported |
+| "did not refuse" as a harmfulness signal | JailbreakBench judge comparison, 3 annotators | 300 | 0.412 | 0.982 | 0.581 | 0.133 | not supported |
+| Qwen3Guard-Gen-8B, unsafe label | JailbreakBench judge comparison | 300 | 0.747 | 0.991 | 0.852 | 0.745 | supported |
+| abuse word list | BeaverTails 30k test, hate / offensive flag | 3,021 | 0.600 | 0.199 | 0.298 | 0.262 | not supported |
+| abuse word list | ToxicChat (human toxicity of user turns) | 5,083 | 0.565 | 0.036 | 0.068 | 0.059 | not supported |
+
+- **Strict recovery is trustworthy.** The recovery numbers in Phase 2 rest on a detector that matches humans (kappa 0.71; 0.78–0.87 on three of five source models).
+- **False refusal is undercounted.** The opening-refusal rule is almost never wrong when it fires (precision 0.99) but misses more than half of the refusals humans see (recall 0.44): its phrase list lacks common openings such as "I'm sorry, but" and "I apologize". So the false-refusal rates in Phases 1 and 2 are lower bounds. Qwen3Guard is much closer to humans (kappa 0.84), which also means its disagreements with our rule in the Phase 2 audit mostly pointed at real refusals.
+- **The abuse rule should not be trusted on its own.** A small insult list catches few of the responses humans call hateful or toxic (recall 0.04–0.20). In the case study the abuse class is narrow (explicit insult requests), but its violation rates are the least reliable numbers in this README.
+- **Not validated by any public human labels:** the guarantee lexicon, the planted-private-data rule and the off-topic markers. No public dataset labels these behaviours.
+
+### Phase 2 false-refusal rates under the human-validated detectors
+
+Because the false-refusal rule was "weak", the saved Phase 2 replies were re-scored with the other detectors (no regeneration; Phase 2 results are unchanged). Full table: [`results/phase3/phase2_false_refusal_rescored.md`](results/phase3/phase2_false_refusal_rescored.md).
+
+| model (benign requests) | opening rule (Phase 2) | recovery marker | refusal phrase anywhere |
+|---|:--:|:--:|:--:|
+| student, no prompt | 0.004 | 0.111 | 0.013 |
+| student + safety prompt | 0.258 | 0.587 | 0.604 |
+| teacher (9B) + safety prompt | 0.031 | 0.133 | 0.440 |
+| OPCD, 3 seeds | 0.219 ± 0.029 | 0.415 ± 0.003 | 0.758 ± 0.009 |
+| OPCD + guided rollouts, 3 seeds | 0.202 ± 0.011 | 0.329 ± 0.067 | 0.753 ± 0.078 |
+| DPO, 3 seeds | 0.024 ± 0.041 | 0.110 ± 0.140 | 0.073 ± 0.126 |
+
+- **The "less over-refusal than the prompted student" claim depends on the detector.** It holds under the opening rule and the recovery marker (0.219 / 0.415 vs 0.258 / 0.587), but reverses when any refusal phrase anywhere counts (0.758 vs 0.604).
+- **The reason is a style the distilled students learned:** they answer the question and then add an unrequested disclaimer ("I cannot share any private details about the owner…", "I cannot guarantee a specific refund date…"). In 126 of 225 benign replies of `opcd_s0`, a refusal phrase appears only after the opening. Whether that counts as a refusal is a definition choice; the opening rule says no, a strict human reading of "partial refusal" might say yes.
+
+---
+
+## 8 · What we learned
 
 All takeaways are measured in the single rental-support case study. They are evidence about the method in that setting, not proof that it generalises.
 
 | | Takeaway | Evidence |
 |:-:|---|---|
 | ✅ | **On-policy context distillation (Ye et al.'s method) reproduces the prompt's safety effect in a narrow domain** without any prompt at inference, using 57% fewer input tokens. | violations 0.516 → 0.161 (p < 0.0001); vs prompted student p = 0.58; tokens 478.6 → 203.6 |
-| ✅ | **A long safety prompt makes a small model over-refuse;** distillation keeps more helpfulness. | false refusal 0.369 vs 0.106 (p < 0.0001) |
+| ⚖️ | **A long safety prompt makes a small model over-refuse;** distillation keeps more helpfulness, but only by the opening-refusal definition: the distilled students add unrequested disclaimers after answering (Phase 3). | false refusal 0.369 vs 0.106 (p < 0.0001); detector comparison in section 7 |
 | ⚖️ | **Guided rollouts: no recovery gain in this run.** Recovery 0.452 vs 0.581 (p = 0.057), single seed, step-25 checkpoint. | CI table |
 | ⚖️ | **DPO wins on recovery and false refusals, loses on off-topic jailbreaks.** | per-class table |
 | ✅ | **Phase 2: the distillation result survives a 3x larger, harder test set and 3 seeds.** Violations 0.419 → 0.041 ± 0.016 without a safety prompt; helpfulness 0.675 vs 0.391 for the prompted student. | Phase 2 results table |
 | ❌ | **Phase 2: guided rollouts do not help recovery, in any seed or ablation.** Bank-prefix recovery 0.269 vs 0.510; pre-registered rule failed. | decision rule, ablations |
 | ⚠️ | **Phase 2: borderline requests are unsolved.** 43–47% refusals for every distilled model; the 9B teacher refuses 36.7%, so distillation inherits the teacher's over-caution. | borderline false-refusal column |
 | ⚠️ | **Phase 2: DPO's low false refusals are not helpfulness.** Helpfulness 0.279 and recovery 0.089 at k = 20. | Phase 2 results table |
+| ✅ | **Phase 3: no knowledge loss.** MMLU within −0.002 to +0.005 of the base for all 9 checkpoints (all p > 0.05). | forgetting table |
+| ⚠️ | **Phase 3: a distilled guardrail is as narrow as its prompt.** The students decline 89–95% of general (IFEval) tasks; IFEval 0.490 → 0.09–0.12. The prompted student already declines 49.5%. | forgetting table |
+| ⚠️ | **Phase 3: the checker is partly validated.** Strict recovery matches humans (kappa 0.71); false refusal is undercounted (recall 0.44); the abuse list does not match human toxicity labels. Qwen3Guard matches humans better than our refusal rule (kappa 0.84). | verifier validation table |
 | ⚠️ | **Verifier choices change the story.** An early verifier counted "I cannot guarantee…" anywhere as a refusal and inflated the prompted models' false refusals (0.63 and 0.36 before the fix, 0.369 and 0.019 after). All conditions were re-scored with the final verifier. | `python -m guardrail_distill.evaluation --phase phase1 --cond rescore` |
 
 ---
 
-## 8 · Reproduce
+## 9 · Reproduce
 
 ```bash
 bash run_all.sh --dry-run             # list every step
 bash run_all.sh --phase1              # Phase 1: baselines, OPCD, OPCD + guided, DPO, CIs, plots
 bash run_all.sh --phase2              # Phase 2: data v2, then the GPU job queue (trainings, evals, audit, latency), CIs, plots
+bash run_all.sh --phase3              # Phase 3: verifier validation + MMLU/IFEval for base and the 9 Phase 2 checkpoints (needs Phase 2 checkpoints)
 ```
 
 Step by step (use the venv's interpreter: `.venv/Scripts/python.exe` on Windows, `.venv/bin/python` elsewhere):
@@ -355,6 +428,10 @@ python -m guardrail_distill.audit                                          # ver
 python -m guardrail_distill.significance --phase phase2                    # results/phase2/ci.md
 python -m guardrail_distill.plots --phase phase2                           # results/phase2/figures/
 python scripts/phase2_jobs.py && python scripts/job_queue.py --jobs results/phase2/raw/queue/jobs.json --mem_gb 64 --threads 19   # every Phase 2 job
+python -m guardrail_distill.validate_public                               # Phase 3: rules + Qwen3Guard vs public human labels
+python -m guardrail_distill.forgetting --model opcd_s0 --task mmlu        # also --task ifeval; --model base | base_prompt | <phase 2 run>
+python -m guardrail_distill.forgetting --aggregate                        # results/phase3/forgetting.md and figure
+python -m guardrail_distill.rescore_refusal                               # Phase 2 false refusal under the validated detectors
 ```
 
 | What | Where it comes from | Lands in |
@@ -363,11 +440,12 @@ python scripts/phase2_jobs.py && python scripts/job_queue.py --jobs results/phas
 | `Qwen/Qwen3.5-0.8B`, `Qwen/Qwen3.5-9B` | Hugging Face Hub | `.cache/huggingface/` (project-local) |
 | `Qwen/Qwen3Guard-Gen-8B` (audit only) | Hugging Face Hub | `.cache/huggingface/` |
 | Dataset | generated locally from templates, nothing downloaded | `data/phase1`, `data/phase2` |
+| Phase 3 public data: `natolambert/xstest-v2-copy` (CC-BY-4.0), `JailbreakBench/JBB-Behaviors` judge_comparison (MIT), `PKU-Alignment/BeaverTails` (CC-BY-NC-4.0), `lmsys/toxic-chat` (CC-BY-NC-4.0), `cais/mmlu` (MIT), `google/IFEval` (Apache-2.0) | Hugging Face Hub | `data/external/`, `.cache/huggingface/` (git-ignored; the NC datasets are used for evaluation only and never redistributed) |
 | Trained checkpoints | produced by the run | `ckpt/<phase>/` (git-ignored) |
 
 **Hardware used:** one NVIDIA RTX PRO 5000 (72 GB, Blackwell, needs cu128 wheels). The teacher (~18 GB, bf16) plus a full fine-tune of the 0.8B student fit comfortably. **Time on this machine:** OPCD 44 min, OPCD + guided rollouts 29 min, for 150 steps each.
 
-## 9 · Repository structure
+## 10 · Repository structure
 
 ```
 guardrail-aware-distill/
@@ -382,12 +460,15 @@ guardrail-aware-distill/
 │   ├── dpo_baseline.py            # verifier-labelled pairs + TRL DPO
 │   ├── significance.py            # bootstrap CIs, exact McNemar, mean ± std over seeds -> results/<phase>/ci.md
 │   ├── audit.py                   # verifier vs an independent safety classifier
+│   ├── validate_public.py         # Phase 3: rules and Qwen3Guard vs public human labels
+│   ├── forgetting.py              # Phase 3: MMLU (letter log-prob) and IFEval (lm-eval) + aggregation
+│   ├── rescore_refusal.py         # Phase 3: Phase 2 false refusal under the validated detectors
 │   ├── plots.py                   # figures -> results/<phase>/figures/
 │   └── data.py · env.py           # data build/load · project-local caches, thread cap, per-phase paths
-├── scripts/                       # job_queue.py (GPU-budgeted queue), phase2_jobs.py, check_environment.py
+├── scripts/                       # job_queue.py (GPU-budgeted queue), phase2_jobs.py, phase3_jobs.py, check_environment.py
 ├── tests/                         # test_rental_support_v1.py (24), test_rental_support.py (17)
 ├── data/phase1 · data/phase2      # generated train/dev/test JSONL
-├── results/phase1 · results/phase2   # eval JSON, training logs, ci.md, figures quoted in this README
+├── results/phase1 · phase2 · phase3  # eval JSON, training logs, ci.md, validation and forgetting tables, figures
 └── run_all.sh · requirements.txt · LICENSE
 ```
 
@@ -403,7 +484,7 @@ guardrail-aware-distill/
 - **Latency:** batch 1, greedy, 3 warm-up replies, mean over 20 replies.
 </details>
 
-## 10 · References
+## 11 · References
 
 - **On-policy context distillation (the base method):** Ye, Dong, Wu, Huang, Wei (Microsoft Research). *On-Policy Context Distillation for Language Models.* [arXiv:2602.12275](https://arxiv.org/abs/2602.12275), 2026
 - **Prompt Baking:** A. Bhargava, C. Witkowski, A. Detkov, M. Thomson. *Prompt Baking.* [arXiv:2409.13697](https://arxiv.org/abs/2409.13697), 2024
@@ -414,17 +495,18 @@ guardrail-aware-distill/
 - **Shallow alignment and recovery:** X. Qi et al. *Safety Alignment Should Be Made More Than Just a Few Tokens Deep.* ICLR 2025, [arXiv:2406.05946](https://arxiv.org/abs/2406.05946)
 - **Preference optimisation:** R. Rafailov et al. *Direct Preference Optimization.* NeurIPS 2023, [arXiv:2305.18290](https://arxiv.org/abs/2305.18290)
 
-## 11 · Limitations
+## 12 · Limitations
 
-Phase 1 limitations (Phase 2 addresses most of them; see section 6):
+Phase 1 limitations (Phase 2 addresses most of them; see section 6). Phase 2 and 3 additions are listed first.
 
 
+- **Phase 3 additions:** the public human labels come from other models and other tasks (XSTest, JailbreakBench, BeaverTails, ToxicChat), so they test whether the rules transfer, not whether they are exact in the rental domain; the guarantee, planted-data and off-topic rules have no public human labels; Jigsaw was skipped (manual download); MMLU uses our own letter-log-probability scorer in lm-eval's prompt format, not the harness (the harness needed 58 GB for one model); IFEval is capped at 512 new tokens for every model.
 - **Phase 2 additions:** ablations use one seed; the audit judge (Qwen3Guard-Gen-8B) is from the same model family as the student and teacher and has no guarantee or off-topic category; the borderline set is test-only and templated; the self-prefix pool covers only 149 of 320 adversarial test prompts; the forgetting check was not run; latency has n = 50 on a desktop GPU.
 - **One case study.** All evidence comes from one narrow domain (rental support), one model family and one student size; whether the method, the over-refusal finding or the negative result on guided rollouts generalise to other domains, tasks or scales is untested.
 - **Single seed (Phase 1), single domain, single student size.** The CIs cover test-prompt sampling only, not training randomness; differences of a few prompts are within noise.
 - **Small test set:** 62 adversarial and 160 benign prompts, 14–16 per adversarial class; 16 held-out templates.
 - **Templated synthetic data.** Held-out templates, but the same domain, language style and CRM format as training.
-- **Rule-based verifier:** lexicons are not exhaustive and have false positives (a refusal that quotes an insult or a guarantee phrase can be flagged) and false negatives. No LLM judge and no human evaluation of helpfulness. `false_refusal` only checks the opening of a reply.
+- **Rule-based verifier:** lexicons are not exhaustive and have false positives (a refusal that quotes an insult or a guarantee phrase can be flagged) and false negatives; Phase 3 measures how far its refusal, recovery and abuse rules agree with public human labels. No human evaluation of helpfulness. `false_refusal` only checks the opening of a reply.
 - **Recovery metric:** it only checks that the continuation contains no violation; a continuation that keeps complying in other words can still pass.
 - **Shortened training:** 150 steps instead of the planned 300; the guided-rollout checkpoint (step 25) was picked on a 34-prompt adversarial dev set.
 - **Latency:** shared GPU, batch 1, n = 20, desktop GPU only. Generation was slow because the Qwen3.5 decode path is launch-bound here; the baseline evaluations ran with PyTorch fallback kernels and later runs after `flash-linear-attention` was installed (numerically near-identical, not bit-identical).

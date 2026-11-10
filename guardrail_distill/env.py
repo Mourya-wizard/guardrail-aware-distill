@@ -3,7 +3,7 @@ import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for k, v in {"HF_HOME": ".cache/huggingface", "TORCH_HOME": ".cache/torch", "XDG_CACHE_HOME": ".cache",
-             "MPLCONFIGDIR": ".cache/mpl", "TRITON_CACHE_DIR": ".cache/triton"}.items():
+             "MPLCONFIGDIR": ".cache/mpl", "TRITON_CACHE_DIR": f".cache/triton/{os.getpid()}"}.items():  # per process: parallel jobs raced on a shared Triton cache (Windows PermissionError)
     os.environ.setdefault(k, os.path.join(ROOT, v))
 os.environ.setdefault("WANDB_DISABLED", "true")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")

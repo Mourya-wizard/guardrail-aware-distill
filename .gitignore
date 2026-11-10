@@ -14,3 +14,6 @@ __pycache__/
 P3_guardrail_distill_trackA_prompt.md
 P3_guardrail_distill_trackA2_prompt.md
 PROMPT_PHASE2.md
+P3_guardrail_distill_phase3_validation_prompt.md
+PROMPT_PHASE3.md
+data/external/

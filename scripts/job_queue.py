@@ -24,9 +24,13 @@ def main():
     qdir = os.path.dirname(a.jobs)
     status_path = os.path.join(qdir, "status.json")
     status = json.load(open(status_path)) if os.path.exists(status_path) else {}
+    status = {k: v for k, v in status.items() if v.get("state") != "running"}  # jobs left "running" by a dead queue are re-run
     running = {}  # name -> (Popen, job)
     while True:
-        jobs = {j["name"]: j for j in json.load(open(a.jobs))}
+        try:
+            jobs = {j["name"]: j for j in json.load(open(a.jobs))}
+        except json.JSONDecodeError:  # job file being rewritten; read it again next poll
+            time.sleep(1); continue
         for name, (p, j) in list(running.items()):
             if p.poll() is not None:
                 del running[name]

@@ -1,0 +1,529 @@
+{
+ "per_condition": {
+  "student_none": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0044,
+     0.0,
+     0.0133
+    ],
+    "refusal anywhere": [
+     0.0133,
+     0.0,
+     0.0311
+    ],
+    "recovery marker (best on XSTest)": [
+     0.1111,
+     0.0711,
+     0.1511
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.0067,
+     0.0,
+     0.02
+    ],
+    "refusal anywhere": [
+     0.02,
+     0.0,
+     0.0467
+    ],
+    "recovery marker (best on XSTest)": [
+     0.06,
+     0.0267,
+     0.1
+    ]
+   }
+  },
+  "student_prompt": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2578,
+     0.2,
+     0.3156
+    ],
+    "refusal anywhere": [
+     0.6044,
+     0.5422,
+     0.6711
+    ],
+    "recovery marker (best on XSTest)": [
+     0.5867,
+     0.5244,
+     0.6489
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4867,
+     0.4067,
+     0.56
+    ],
+    "refusal anywhere": [
+     0.6933,
+     0.62,
+     0.7667
+    ],
+    "recovery marker (best on XSTest)": [
+     0.7267,
+     0.6533,
+     0.8
+    ]
+   }
+  },
+  "teacher_prompt": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0311,
+     0.0089,
+     0.0533
+    ],
+    "refusal anywhere": [
+     0.44,
+     0.3778,
+     0.5022
+    ],
+    "recovery marker (best on XSTest)": [
+     0.1333,
+     0.0889,
+     0.1822
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.3667,
+     0.2933,
+     0.4467
+    ],
+    "refusal anywhere": [
+     0.6267,
+     0.5533,
+     0.7067
+    ],
+    "recovery marker (best on XSTest)": [
+     0.5667,
+     0.4867,
+     0.64
+    ]
+   }
+  },
+  "opcd_s0": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.1911,
+     0.1422,
+     0.2489
+    ],
+    "refusal anywhere": [
+     0.7511,
+     0.6933,
+     0.8044
+    ],
+    "recovery marker (best on XSTest)": [
+     0.4178,
+     0.3511,
+     0.48
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.48,
+     0.4,
+     0.5533
+    ],
+    "refusal anywhere": [
+     0.8333,
+     0.7733,
+     0.8933
+    ],
+    "recovery marker (best on XSTest)": [
+     0.68,
+     0.6067,
+     0.7533
+    ]
+   }
+  },
+  "opcd_s1": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2178,
+     0.1689,
+     0.2756
+    ],
+    "refusal anywhere": [
+     0.7556,
+     0.7022,
+     0.8133
+    ],
+    "recovery marker (best on XSTest)": [
+     0.4133,
+     0.3511,
+     0.48
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4533,
+     0.3667,
+     0.5333
+    ],
+    "refusal anywhere": [
+     0.8267,
+     0.7667,
+     0.8867
+    ],
+    "recovery marker (best on XSTest)": [
+     0.6867,
+     0.6067,
+     0.76
+    ]
+   }
+  },
+  "opcd_s2": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2489,
+     0.2,
+     0.3022
+    ],
+    "refusal anywhere": [
+     0.7689,
+     0.7156,
+     0.8222
+    ],
+    "recovery marker (best on XSTest)": [
+     0.4133,
+     0.3511,
+     0.4711
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4667,
+     0.3933,
+     0.5533
+    ],
+    "refusal anywhere": [
+     0.7933,
+     0.7267,
+     0.8533
+    ],
+    "recovery marker (best on XSTest)": [
+     0.7467,
+     0.68,
+     0.8133
+    ]
+   }
+  },
+  "opcd_gr_s0": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.1911,
+     0.1422,
+     0.2444
+    ],
+    "refusal anywhere": [
+     0.8356,
+     0.7822,
+     0.8844
+    ],
+    "recovery marker (best on XSTest)": [
+     0.2622,
+     0.2044,
+     0.32
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.3933,
+     0.32,
+     0.4733
+    ],
+    "refusal anywhere": [
+     0.88,
+     0.8267,
+     0.9333
+    ],
+    "recovery marker (best on XSTest)": [
+     0.6733,
+     0.6,
+     0.7467
+    ]
+   }
+  },
+  "opcd_gr_s1": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2133,
+     0.16,
+     0.2667
+    ],
+    "refusal anywhere": [
+     0.7422,
+     0.6844,
+     0.8
+    ],
+    "recovery marker (best on XSTest)": [
+     0.3289,
+     0.2667,
+     0.3867
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4067,
+     0.3267,
+     0.4867
+    ],
+    "refusal anywhere": [
+     0.7667,
+     0.7,
+     0.8333
+    ],
+    "recovery marker (best on XSTest)": [
+     0.6867,
+     0.6133,
+     0.76
+    ]
+   }
+  },
+  "opcd_gr_s2": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2,
+     0.1511,
+     0.2533
+    ],
+    "refusal anywhere": [
+     0.68,
+     0.6178,
+     0.7378
+    ],
+    "recovery marker (best on XSTest)": [
+     0.3956,
+     0.3333,
+     0.4578
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.5,
+     0.42,
+     0.5733
+    ],
+    "refusal anywhere": [
+     0.8133,
+     0.7533,
+     0.8667
+    ],
+    "recovery marker (best on XSTest)": [
+     0.72,
+     0.6533,
+     0.7867
+    ]
+   }
+  },
+  "dpo_s0": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refusal anywhere": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "recovery marker (best on XSTest)": [
+     0.0356,
+     0.0133,
+     0.0622
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refusal anywhere": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "recovery marker (best on XSTest)": [
+     0.0667,
+     0.0333,
+     0.1067
+    ]
+   }
+  },
+  "dpo_s1": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0711,
+     0.04,
+     0.1067
+    ],
+    "refusal anywhere": [
+     0.2178,
+     0.1689,
+     0.2756
+    ],
+    "recovery marker (best on XSTest)": [
+     0.2711,
+     0.2133,
+     0.3289
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.0733,
+     0.0333,
+     0.12
+    ],
+    "refusal anywhere": [
+     0.2667,
+     0.2,
+     0.34
+    ],
+    "recovery marker (best on XSTest)": [
+     0.4933,
+     0.4133,
+     0.58
+    ]
+   }
+  },
+  "dpo_s2": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refusal anywhere": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "recovery marker (best on XSTest)": [
+     0.0222,
+     0.0044,
+     0.0444
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.0067,
+     0.0,
+     0.02
+    ],
+    "refusal anywhere": [
+     0.0133,
+     0.0,
+     0.0333
+    ],
+    "recovery marker (best on XSTest)": [
+     0.04,
+     0.0133,
+     0.0733
+    ]
+   }
+  }
+ },
+ "seed_mean_std": {
+  "opcd": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2193,
+     0.0289
+    ],
+    "refusal anywhere": [
+     0.7585,
+     0.0093
+    ],
+    "recovery marker (best on XSTest)": [
+     0.4148,
+     0.0026
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4667,
+     0.0134
+    ],
+    "refusal anywhere": [
+     0.8178,
+     0.0214
+    ],
+    "recovery marker (best on XSTest)": [
+     0.7045,
+     0.0367
+    ]
+   }
+  },
+  "opcd_gr": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.2015,
+     0.0112
+    ],
+    "refusal anywhere": [
+     0.7526,
+     0.0783
+    ],
+    "recovery marker (best on XSTest)": [
+     0.3289,
+     0.0667
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.4333,
+     0.0581
+    ],
+    "refusal anywhere": [
+     0.82,
+     0.0569
+    ],
+    "recovery marker (best on XSTest)": [
+     0.6933,
+     0.024
+    ]
+   }
+  },
+  "dpo": {
+   "benign": {
+    "opening rule (Phase 2)": [
+     0.0237,
+     0.041
+    ],
+    "refusal anywhere": [
+     0.0726,
+     0.1257
+    ],
+    "recovery marker (best on XSTest)": [
+     0.1096,
+     0.14
+    ]
+   },
+   "benign_borderline": {
+    "opening rule (Phase 2)": [
+     0.0267,
+     0.0405
+    ],
+    "refusal anywhere": [
+     0.0933,
+     0.1503
+    ],
+    "recovery marker (best on XSTest)": [
+     0.2,
+     0.2544
+    ]
+   }
+  }
+ },
+ "note": "the recovery marker includes words such as 'private', 'instead', 'official channel' that also occur in helpful rental answers, so it can over-count refusals in this domain; read the three columns as a range"
+}

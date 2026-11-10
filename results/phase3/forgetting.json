@@ -1,0 +1,367 @@
+{
+ "mmlu": {
+  "per_model": {
+   "base": {
+    "acc": [
+     0.5024,
+     0.4943,
+     0.5107
+    ],
+    "delta_vs_base": 0.0
+   },
+   "opcd_s0": {
+    "acc": [
+     0.5059,
+     0.4979,
+     0.5144
+    ],
+    "delta_vs_base": 0.0035,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 919,
+     "b_only": 870,
+     "p": 0.2564
+    }
+   },
+   "opcd_s1": {
+    "acc": [
+     0.5043,
+     0.4962,
+     0.5127
+    ],
+    "delta_vs_base": 0.0019,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 931,
+     "b_only": 904,
+     "p": 0.5439
+    }
+   },
+   "opcd_s2": {
+    "acc": [
+     0.5079,
+     0.4999,
+     0.5162
+    ],
+    "delta_vs_base": 0.0055,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 974,
+     "b_only": 897,
+     "p": 0.0789
+    }
+   },
+   "opcd_gr_s0": {
+    "acc": [
+     0.5053,
+     0.4975,
+     0.5137
+    ],
+    "delta_vs_base": 0.0029,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 965,
+     "b_only": 924,
+     "p": 0.3574
+    }
+   },
+   "opcd_gr_s1": {
+    "acc": [
+     0.5066,
+     0.4986,
+     0.515
+    ],
+    "delta_vs_base": 0.0042,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 1045,
+     "b_only": 987,
+     "p": 0.206
+    }
+   },
+   "opcd_gr_s2": {
+    "acc": [
+     0.5079,
+     0.5001,
+     0.5162
+    ],
+    "delta_vs_base": 0.0055,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 976,
+     "b_only": 899,
+     "p": 0.0792
+    }
+   },
+   "dpo_s0": {
+    "acc": [
+     0.5005,
+     0.4927,
+     0.5091
+    ],
+    "delta_vs_base": -0.0019,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 475,
+     "b_only": 502,
+     "p": 0.4055
+    }
+   },
+   "dpo_s1": {
+    "acc": [
+     0.5031,
+     0.4953,
+     0.5116
+    ],
+    "delta_vs_base": 0.0007,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 363,
+     "b_only": 353,
+     "p": 0.7366
+    }
+   },
+   "dpo_s2": {
+    "acc": [
+     0.5033,
+     0.4952,
+     0.5115
+    ],
+    "delta_vs_base": 0.0009,
+    "mcnemar_vs_base": {
+     "n_pairs": 14042,
+     "a_only": 344,
+     "b_only": 331,
+     "p": 0.6442
+    }
+   }
+  },
+  "per_method": {
+   "opcd": {
+    "delta_mean": 0.0036,
+    "delta_std": 0.0018,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 0
+   },
+   "opcd_gr": {
+    "delta_mean": 0.0042,
+    "delta_std": 0.0013,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 0
+   },
+   "dpo": {
+    "delta_mean": -0.0001,
+    "delta_std": 0.0016,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 0
+   }
+  },
+  "threshold": 0.03
+ },
+ "ifeval": {
+  "per_model": {
+   "base": {
+    "acc": [
+     0.4898,
+     0.4492,
+     0.5323
+    ],
+    "delta_vs_base": 0.0,
+    "refusal_rate": 0.0388,
+    "acc_when_answered": 0.4846,
+    "n_answered": 520
+   },
+   "base_prompt": {
+    "acc": [
+     0.305,
+     0.268,
+     0.342
+    ],
+    "delta_vs_base": -0.1848,
+    "refusal_rate": 0.4954,
+    "acc_when_answered": 0.4066,
+    "n_answered": 273,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 51,
+     "b_only": 151,
+     "p": 0.0
+    }
+   },
+   "opcd_s0": {
+    "acc": [
+     0.0906,
+     0.0684,
+     0.1165
+    ],
+    "delta_vs_base": -0.3992,
+    "refusal_rate": 0.9427,
+    "acc_when_answered": 0.2903,
+    "n_answered": 31,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 21,
+     "b_only": 237,
+     "p": 0.0
+    }
+   },
+   "opcd_s1": {
+    "acc": [
+     0.0924,
+     0.0702,
+     0.1165
+    ],
+    "delta_vs_base": -0.3974,
+    "refusal_rate": 0.9427,
+    "acc_when_answered": 0.2581,
+    "n_answered": 31,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 22,
+     "b_only": 237,
+     "p": 0.0
+    }
+   },
+   "opcd_s2": {
+    "acc": [
+     0.0998,
+     0.0758,
+     0.1257
+    ],
+    "delta_vs_base": -0.39,
+    "refusal_rate": 0.9372,
+    "acc_when_answered": 0.3529,
+    "n_answered": 34,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 29,
+     "b_only": 240,
+     "p": 0.0
+    }
+   },
+   "opcd_gr_s0": {
+    "acc": [
+     0.1183,
+     0.0924,
+     0.1442
+    ],
+    "delta_vs_base": -0.3715,
+    "refusal_rate": 0.9002,
+    "acc_when_answered": 0.3704,
+    "n_answered": 54,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 30,
+     "b_only": 231,
+     "p": 0.0
+    }
+   },
+   "opcd_gr_s1": {
+    "acc": [
+     0.122,
+     0.0943,
+     0.1497
+    ],
+    "delta_vs_base": -0.3678,
+    "refusal_rate": 0.9519,
+    "acc_when_answered": 0.2692,
+    "n_answered": 26,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 33,
+     "b_only": 232,
+     "p": 0.0
+    }
+   },
+   "opcd_gr_s2": {
+    "acc": [
+     0.1146,
+     0.0869,
+     0.1405
+    ],
+    "delta_vs_base": -0.3752,
+    "refusal_rate": 0.8872,
+    "acc_when_answered": 0.2459,
+    "n_answered": 61,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 23,
+     "b_only": 226,
+     "p": 0.0
+    }
+   },
+   "dpo_s0": {
+    "acc": [
+     0.4307,
+     0.39,
+     0.475
+    ],
+    "delta_vs_base": -0.0591,
+    "refusal_rate": 0.0961,
+    "acc_when_answered": 0.4519,
+    "n_answered": 489,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 54,
+     "b_only": 86,
+     "p": 0.0086
+    }
+   },
+   "dpo_s1": {
+    "acc": [
+     0.4214,
+     0.3789,
+     0.464
+    ],
+    "delta_vs_base": -0.0684,
+    "refusal_rate": 0.2477,
+    "acc_when_answered": 0.4939,
+    "n_answered": 407,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 58,
+     "b_only": 95,
+     "p": 0.0035
+    }
+   },
+   "dpo_s2": {
+    "acc": [
+     0.3789,
+     0.3383,
+     0.4214
+    ],
+    "delta_vs_base": -0.1109,
+    "refusal_rate": 0.2643,
+    "acc_when_answered": 0.4749,
+    "n_answered": 398,
+    "mcnemar_vs_base": {
+     "n_pairs": 541,
+     "a_only": 47,
+     "b_only": 107,
+     "p": 0.0
+    }
+   }
+  },
+  "per_method": {
+   "opcd": {
+    "delta_mean": -0.3955,
+    "delta_std": 0.0049,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 3
+   },
+   "opcd_gr": {
+    "delta_mean": -0.3715,
+    "delta_std": 0.0037,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 3
+   },
+   "dpo": {
+    "delta_mean": -0.0795,
+    "delta_std": 0.0276,
+    "n_seeds": 3,
+    "seeds_with_measurable_forgetting": 3
+   }
+  },
+  "threshold": 0.05
+ }
+}
